@@ -9,15 +9,13 @@ export async function signUp(formData: FormData) {
   const password = formData.get('password') as string
   const username = formData.get('username') as string
 
-  const { data, error } = await supabase.auth.signUp({ email, password })
+  // usernameをメタデータに含めて渡す→トリガーが自動でprofilesに挿入
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { username } },
+  })
   if (error) return { error: error.message }
-
-  if (data.user) {
-    await supabase.from('profiles').insert({
-      id: data.user.id,
-      username,
-    })
-  }
 
   redirect('/dashboard')
 }
