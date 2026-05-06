@@ -8,19 +8,36 @@ import type { PromptWithDetails } from '@/types'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'プロンプトシェア',
+  alternateName: 'PromptShare',
+  url: 'https://prompt-share-rosy.vercel.app',
+  description: 'プロンプトシェアは、業務委託・アプリ制作・画像生成・ライティングなど、あらゆるジャンルのAIプロンプトを無料で共有・発見できるプロンプト共有サービスです。',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://prompt-share-rosy.vercel.app/prompts?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+}
+
 export default async function HomePage() {
   const supabase = await createClient()
 
   const { data: prompts } = await supabase
     .from('prompts')
-    .select(`*, genre:genres(*), profile:profiles(*), favorites(count)`)
+    .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)`)
     .eq('is_public', true)
     .order('created_at', { ascending: false })
     .limit(8)
 
   const popularPrompts = await supabase
     .from('prompts')
-    .select(`*, genre:genres(*), profile:profiles(*), favorites(count)`)
+    .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)`)
     .eq('is_public', true)
     .order('copy_count', { ascending: false })
     .limit(4)
@@ -38,6 +55,10 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden py-24 px-4">
         <div className="absolute inset-0 bg-gradient-to-b from-violet-950/30 via-background to-background" />
@@ -48,7 +69,7 @@ export default async function HomePage() {
           <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/30
                           rounded-full px-4 py-1.5 text-sm text-violet-300 mb-6">
             <Zap className="w-3.5 h-3.5" />
-            AIプロンプトを共有・発見するプラットフォーム
+            AIプロンプト共有サービス「プロンプトシェア」
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
             最高の
@@ -56,8 +77,8 @@ export default async function HomePage() {
             <br />を、あなたの手に
           </h1>
           <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto">
-            業務委託・アプリ制作・画像生成など、あらゆるジャンルの厳選プロンプトを
-            発見・共有・お気に入り登録できます。
+            プロンプトシェアは、業務委託・アプリ制作・画像生成など、あらゆるジャンルの厳選AIプロンプトを
+            無料で発見・共有・お気に入り登録できるプロンプト共有サービスです。
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/prompts">

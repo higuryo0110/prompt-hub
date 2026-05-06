@@ -29,7 +29,7 @@ export default function Navbar() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" />
           </div>
-          <span className="gradient-text">PromptHub</span>
+          <span className="gradient-text">プロンプトシェア</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

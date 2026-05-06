@@ -26,6 +26,20 @@ export async function createPrompt(formData: FormData) {
   if (error) return { error: error.message }
 
   revalidatePath('/prompts')
+
+  // IndexNow: Bingに新規プロンプトを即時通知
+  const url = `https://prompt-share-rosy.vercel.app/prompts/${data.id}`
+  fetch('https://api.indexnow.org/indexnow', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      host: 'prompt-share-rosy.vercel.app',
+      key: 'a4f8c2e1b7d3f9a4c2e1b7d3f9a4c2e1',
+      keyLocation: 'https://prompt-share-rosy.vercel.app/a4f8c2e1b7d3f9a4c2e1b7d3f9a4c2e1.txt',
+      urlList: [url, 'https://prompt-share-rosy.vercel.app/prompts'],
+    }),
+  }).catch(() => {})
+
   redirect(`/prompts/${data.id}`)
 }
 

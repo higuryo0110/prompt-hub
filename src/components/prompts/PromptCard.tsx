@@ -6,15 +6,29 @@ import { GENRES } from '@/lib/genres'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-export default function PromptCard({ prompt }: { prompt: PromptWithDetails }) {
+const RANK_STYLES: Record<number, { badge: string; border: string }> = {
+  1: { badge: 'bg-yellow-400 text-yellow-900', border: 'border-yellow-400/50' },
+  2: { badge: 'bg-slate-300 text-slate-900',   border: 'border-slate-300/50' },
+  3: { badge: 'bg-amber-600 text-amber-100',   border: 'border-amber-600/50' },
+}
+
+export default function PromptCard({ prompt, rank }: { prompt: PromptWithDetails; rank?: number }) {
   const genre = GENRES.find(g => g.id === prompt.genre_id)
   const IconComponent = genre ? (Icons[genre.icon as keyof typeof Icons] as LucideIcon) : null
+  const rankStyle = rank ? RANK_STYLES[rank] : null
 
   return (
     <Link href={`/prompts/${prompt.id}`}>
-      <div className="group relative bg-card border border-border rounded-2xl p-5 h-full
+      <div className={`group relative bg-card border rounded-2xl p-5 h-full
                       transition-all duration-300 hover:-translate-y-1 card-glow cursor-pointer
-                      hover:border-violet-500/50">
+                      hover:border-violet-500/50
+                      ${rankStyle ? rankStyle.border : 'border-border'}`}>
+        {rankStyle && (
+          <span className={`absolute -top-2.5 -left-2.5 w-7 h-7 rounded-full text-xs font-black
+                            flex items-center justify-center shadow-lg ${rankStyle.badge}`}>
+            {rank}
+          </span>
+        )}
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-500/5 to-cyan-500/5
                         opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

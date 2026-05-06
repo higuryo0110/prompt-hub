@@ -18,7 +18,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { id } = await params
   const { data } = await supabase.from('prompts').select('title,description').eq('id', id).single()
-  return { title: data?.title ?? 'プロンプト詳細', description: data?.description ?? '' }
+  const title = data?.title ?? 'プロンプト詳細'
+  const description = data?.description || `${title} - プロンプトシェアで公開されているAIプロンプトです。`
+  return {
+    title,
+    description,
+    openGraph: { title, description, type: 'article' },
+    twitter: { card: 'summary', title, description },
+    alternates: { canonical: `https://prompt-share-rosy.vercel.app/prompts/${id}` },
+  }
 }
 
 export default async function PromptDetailPage({ params }: Props) {
@@ -27,7 +35,7 @@ export default async function PromptDetailPage({ params }: Props) {
 
   const { data: prompt } = await supabase
     .from('prompts')
-    .select(`*, genre:genres(*), profile:profiles(*)`)
+    .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*)`)
     .eq('id', id)
     .single()
 

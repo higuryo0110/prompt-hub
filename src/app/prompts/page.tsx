@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import PromptCard from '@/components/prompts/PromptCard'
 import GenreFilter from '@/components/prompts/GenreFilter'
-import { Input } from '@/components/ui/input'
-import { Search } from 'lucide-react'
+import SortFilter from '@/components/prompts/SortFilter'
+import SearchBox from '@/components/prompts/SearchBox'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import { Suspense } from 'react'
+import { TrendingUp, Heart, Clock, Search } from 'lucide-react'
 
 type Props = {
   searchParams: Promise<{ genre?: string; q?: string; sort?: string }>
@@ -16,7 +17,7 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
 
   let query = supabase
     .from('prompts')
-    .select(`*, genre:genres(*), profile:profiles(*), favorites(count)`)
+    .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*)`)
     .eq('is_public', true)
 
   if (genre && genre !== 'all') {
@@ -29,6 +30,8 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
 
   if (sort === 'popular') {
     query = query.order('copy_count', { ascending: false })
+  } else if (sort === 'likes') {
+    query = query.order('favorite_count', { ascending: false })
   } else {
     query = query.order('created_at', { ascending: false })
   }
@@ -37,24 +40,57 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
 
   const prompts: PromptWithDetails[] = (data ?? []).map((p: Record<string, unknown>) => ({
     ...(p as unknown as PromptWithDetails),
-    favorite_count: Array.isArray(p.favorites)
-      ? (p.favorites[0] as { count: number })?.count ?? 0
-      : 0,
+    favorite_count: (p.favorite_count as number) ?? 0,
   }))
 
   if (prompts.length === 0) {
     return (
       <div className="text-center py-24 text-muted-foreground">
+        <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
         <p className="text-lg mb-2">プロンプトが見つかりませんでした</p>
-        <p className="text-sm">条件を変えて検索してみてください</p>
+        <p className="text-sm">別のキーワードやジャンルで試してみてください</p>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {prompts.map(prompt => (
-        <PromptCard key={prompt.id} prompt={prompt} />
+    <>
+      <p className="text-sm text-muted-foreground mb-4">{prompts.length}件のプロンプト</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {prompts.map((prompt, index) => (
+          <PromptCard key={prompt.id} prompt={prompt} rank={sort !== 'new' && index < 3 ? index + 1 : undefined} />
+        ))}
+      </div>
+    </>
+  )
+}
+
+async function RankingStats() {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('prompts')
+    .select('title, copy_count, favorite_count')
+    .eq('is_public', true)
+    .order('favorite_count', { ascending: false })
+    .limit(3)
+
+  if (!data?.length) return null
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
+      {data.map((p, i) => (
+        <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
+          <span className={`text-2xl font-black ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-slate-300' : 'text-amber-600'}`}>
+            #{i + 1}
+          </span>
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">{p.title}</p>
+            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-pink-400" />{p.favorite_count}</span>
+              <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-violet-400" />{p.copy_count}</span>
+            </div>
+          </div>
+        </div>
       ))}
     </div>
   )
@@ -64,6 +100,8 @@ export default async function PromptsPage({ searchParams }: Props) {
   const params = await searchParams
   const { genre, q, sort } = params
 
+  const sortLabel = sort === 'popular' ? 'コピー数ランキング' : sort === 'likes' ? 'いいねランキング' : null
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
       <div className="mb-8">
@@ -71,23 +109,43 @@ export default async function PromptsPage({ searchParams }: Props) {
         <p className="text-muted-foreground">厳選されたAIプロンプトを発見してください</p>
       </div>
 
-      <div className="flex flex-col gap-6 mb-8">
-        <form method="get" className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            name="q"
-            defaultValue={q}
-            placeholder="プロンプトを検索..."
-            className="pl-9 bg-card border-border focus:border-violet-500"
-          />
-          {genre && <input type="hidden" name="genre" value={genre} />}
-        </form>
+      {/* いいねランキングTOP3（ソート時のみ表示） */}
+      {(sort === 'likes' || sort === 'popular') && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            {sort === 'likes'
+              ? <><Heart className="w-4 h-4 text-pink-400" /><span className="text-sm font-semibold">{sortLabel}</span></>
+              : <><TrendingUp className="w-4 h-4 text-violet-400" /><span className="text-sm font-semibold">{sortLabel}</span></>
+            }
+          </div>
+          <Suspense>
+            <RankingStats />
+          </Suspense>
+        </div>
+      )}
 
+      {/* 検索・フィルター */}
+      <div className="flex flex-col gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <Suspense>
+            <SearchBox />
+          </Suspense>
+          <Suspense>
+            <SortFilter />
+          </Suspense>
+        </div>
+        {q && (
+          <p className="text-sm text-muted-foreground flex items-center gap-1.5">
+            <Search className="w-3.5 h-3.5" />
+            <span>「<strong className="text-foreground">{q}</strong>」の検索結果</span>
+          </p>
+        )}
         <Suspense>
           <GenreFilter />
         </Suspense>
       </div>
 
+      {/* プロンプト一覧 */}
       <Suspense fallback={
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (

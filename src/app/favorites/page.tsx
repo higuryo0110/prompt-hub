@@ -11,7 +11,7 @@ export default async function FavoritesPage() {
 
   const { data } = await supabase
     .from('favorites')
-    .select(`prompt:prompts(*, genre:genres(*), profile:profiles(*), favorites(count))`)
+    .select(`prompt:prompts(*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count))`)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
