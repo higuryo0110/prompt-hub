@@ -6,7 +6,7 @@ import SearchBox from '@/components/prompts/SearchBox'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import { Suspense } from 'react'
-import { TrendingUp, Heart, Clock, Search } from 'lucide-react'
+import { TrendingUp, Heart, Search } from 'lucide-react'
 
 type Props = {
   searchParams: Promise<{ genre?: string; q?: string; sort?: string }>
@@ -36,7 +36,9 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
     query = query.order('created_at', { ascending: false })
   }
 
-  const { data } = await query.limit(48)
+  const { data, error } = await query.limit(48)
+
+  if (error) console.error('PromptList error:', error)
 
   const prompts: PromptWithDetails[] = (data ?? []).map((p: Record<string, unknown>) => ({
     ...(p as unknown as PromptWithDetails),
@@ -58,39 +60,50 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
       <p className="text-sm text-muted-foreground mb-4">{prompts.length}件のプロンプト</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {prompts.map((prompt, index) => (
-          <PromptCard key={prompt.id} prompt={prompt} rank={sort !== 'new' && index < 3 ? index + 1 : undefined} />
+          <PromptCard
+            key={prompt.id}
+            prompt={prompt}
+            rank={sort !== 'new' && index < 3 ? index + 1 : undefined}
+          />
         ))}
       </div>
     </>
   )
 }
 
-async function RankingStats() {
+async function RankingTop3({ sort }: { sort: string }) {
   const supabase = await createClient()
+  const orderCol = sort === 'popular' ? 'copy_count' : 'favorite_count'
   const { data } = await supabase
     .from('prompts')
-    .select('title, copy_count, favorite_count')
+    .select('id, title, copy_count, favorite_count')
     .eq('is_public', true)
-    .order('favorite_count', { ascending: false })
+    .order(orderCol, { ascending: false })
     .limit(3)
 
   if (!data?.length) return null
 
+  const medals = ['🥇', '🥈', '🥉']
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
       {data.map((p, i) => (
-        <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center gap-3">
-          <span className={`text-2xl font-black ${i === 0 ? 'text-yellow-400' : i === 1 ? 'text-slate-300' : 'text-amber-600'}`}>
-            #{i + 1}
-          </span>
+        <a key={p.id} href={`/prompts/${p.id}`}
+           className="bg-card border border-border rounded-xl p-4 flex items-center gap-3
+                      hover:border-violet-500/50 transition-colors no-underline">
+          <span className="text-2xl">{medals[i]}</span>
           <div className="min-w-0">
-            <p className="text-sm font-medium truncate">{p.title}</p>
+            <p className="text-sm font-medium truncate text-foreground">{p.title}</p>
             <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-pink-400" />{p.favorite_count}</span>
-              <span className="flex items-center gap-1"><TrendingUp className="w-3 h-3 text-violet-400" />{p.copy_count}</span>
+              <span className="flex items-center gap-1">
+                <Heart className="w-3 h-3 text-pink-400" />{p.favorite_count}
+              </span>
+              <span className="flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-violet-400" />{p.copy_count}
+              </span>
             </div>
           </div>
-        </div>
+        </a>
       ))}
     </div>
   )
@@ -98,9 +111,9 @@ async function RankingStats() {
 
 export default async function PromptsPage({ searchParams }: Props) {
   const params = await searchParams
-  const { genre, q, sort } = params
-
-  const sortLabel = sort === 'popular' ? 'コピー数ランキング' : sort === 'likes' ? 'いいねランキング' : null
+  const genre = params.genre
+  const q = params.q
+  const sort = params.sort ?? 'new'
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -109,50 +122,49 @@ export default async function PromptsPage({ searchParams }: Props) {
         <p className="text-muted-foreground">厳選されたAIプロンプトを発見してください</p>
       </div>
 
-      {/* いいねランキングTOP3（ソート時のみ表示） */}
+      {/* ランキングTOP3（いいね順・コピー数順のみ表示） */}
       {(sort === 'likes' || sort === 'popular') && (
-        <div>
-          <div className="flex items-center gap-2 mb-3">
+        <div className="mb-6">
+          <p className="text-sm font-semibold mb-3 flex items-center gap-1.5">
             {sort === 'likes'
-              ? <><Heart className="w-4 h-4 text-pink-400" /><span className="text-sm font-semibold">{sortLabel}</span></>
-              : <><TrendingUp className="w-4 h-4 text-violet-400" /><span className="text-sm font-semibold">{sortLabel}</span></>
+              ? <><Heart className="w-4 h-4 text-pink-400" />いいねランキング TOP3</>
+              : <><TrendingUp className="w-4 h-4 text-violet-400" />コピー数ランキング TOP3</>
             }
-          </div>
-          <Suspense>
-            <RankingStats />
-          </Suspense>
+          </p>
+          <RankingTop3 sort={sort} />
         </div>
       )}
 
-      {/* 検索・フィルター */}
+      {/* 検索・ソート */}
       <div className="flex flex-col gap-4 mb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <Suspense>
+          <Suspense fallback={<div className="h-9 w-64 bg-card border border-border rounded-lg animate-pulse" />}>
             <SearchBox />
           </Suspense>
-          <Suspense>
-            <SortFilter />
-          </Suspense>
+          <SortFilter current={sort} genre={genre} q={q} />
         </div>
         {q && (
           <p className="text-sm text-muted-foreground flex items-center gap-1.5">
             <Search className="w-3.5 h-3.5" />
-            <span>「<strong className="text-foreground">{q}</strong>」の検索結果</span>
+            「<strong className="text-foreground">{q}</strong>」の検索結果
           </p>
         )}
-        <Suspense>
+        <Suspense fallback={<div className="h-8 bg-card rounded-full animate-pulse w-full max-w-lg" />}>
           <GenreFilter />
         </Suspense>
       </div>
 
-      {/* プロンプト一覧 */}
-      <Suspense fallback={
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="bg-card border border-border rounded-2xl h-56 animate-pulse" />
-          ))}
-        </div>
-      }>
+      {/* プロンプト一覧 - keyでsort変更時に必ず再レンダリング */}
+      <Suspense
+        key={`${genre ?? 'all'}-${q ?? ''}-${sort}`}
+        fallback={
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl h-56 animate-pulse" />
+            ))}
+          </div>
+        }
+      >
         <PromptList genre={genre} q={q} sort={sort} />
       </Suspense>
     </div>
