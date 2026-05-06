@@ -1,16 +1,21 @@
 import { createClient } from '@/lib/supabase/server'
 import PromptCard from '@/components/prompts/PromptCard'
-import GenreFilter from '@/components/prompts/GenreFilter'
-import SortFilter from '@/components/prompts/SortFilter'
-import SearchBox from '@/components/prompts/SearchBox'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import { Suspense } from 'react'
-import { TrendingUp, Heart, Search } from 'lucide-react'
+import { Search, Clock, Heart, TrendingUp, Copy, LayoutGrid } from 'lucide-react'
+import * as Icons from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 type Props = {
   searchParams: Promise<{ genre?: string; q?: string; sort?: string }>
 }
+
+const SORT_OPTIONS = [
+  { value: 'new',     label: '新着順',     icon: Clock },
+  { value: 'likes',   label: 'いいね順',   icon: Heart },
+  { value: 'popular', label: 'コピー数順', icon: Copy },
+]
 
 async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort?: string }) {
   const supabase = await createClient()
@@ -36,9 +41,7 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
     query = query.order('created_at', { ascending: false })
   }
 
-  const { data, error } = await query.limit(48)
-
-  if (error) console.error('PromptList error:', error)
+  const { data } = await query.limit(48)
 
   const prompts: PromptWithDetails[] = (data ?? []).map((p: Record<string, unknown>) => ({
     ...(p as unknown as PromptWithDetails),
@@ -63,7 +66,7 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
           <PromptCard
             key={prompt.id}
             prompt={prompt}
-            rank={sort !== 'new' && index < 3 ? index + 1 : undefined}
+            rank={sort !== 'new' && sort !== undefined && index < 3 ? index + 1 : undefined}
           />
         ))}
       </div>
@@ -71,49 +74,26 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
   )
 }
 
-async function RankingTop3({ sort }: { sort: string }) {
-  const supabase = await createClient()
-  const orderCol = sort === 'popular' ? 'copy_count' : 'favorite_count'
-  const { data } = await supabase
-    .from('prompts')
-    .select('id, title, copy_count, favorite_count')
-    .eq('is_public', true)
-    .order(orderCol, { ascending: false })
-    .limit(3)
-
-  if (!data?.length) return null
-
-  const medals = ['🥇', '🥈', '🥉']
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
-      {data.map((p, i) => (
-        <a key={p.id} href={`/prompts/${p.id}`}
-           className="bg-card border border-border rounded-xl p-4 flex items-center gap-3
-                      hover:border-violet-500/50 transition-colors no-underline">
-          <span className="text-2xl">{medals[i]}</span>
-          <div className="min-w-0">
-            <p className="text-sm font-medium truncate text-foreground">{p.title}</p>
-            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Heart className="w-3 h-3 text-pink-400" />{p.favorite_count}
-              </span>
-              <span className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-violet-400" />{p.copy_count}
-              </span>
-            </div>
-          </div>
-        </a>
-      ))}
-    </div>
-  )
-}
-
 export default async function PromptsPage({ searchParams }: Props) {
   const params = await searchParams
-  const genre = params.genre
-  const q = params.q
+  const genre = params.genre ?? 'all'
+  const q = params.q ?? ''
   const sort = params.sort ?? 'new'
+
+  const buildUrl = (overrides: Record<string, string>) => {
+    const merged = { genre, q, sort, ...overrides }
+    const p = new URLSearchParams()
+    if (merged.genre && merged.genre !== 'all') p.set('genre', merged.genre)
+    if (merged.q) p.set('q', merged.q)
+    if (merged.sort && merged.sort !== 'new') p.set('sort', merged.sort)
+    const qs = p.toString()
+    return `/prompts${qs ? `?${qs}` : ''}`
+  }
+
+  const allGenres = [
+    { id: 0, slug: 'all', name: 'すべて', icon: 'LayoutGrid', color: 'text-slate-300' },
+    ...GENRES,
+  ]
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
@@ -122,41 +102,92 @@ export default async function PromptsPage({ searchParams }: Props) {
         <p className="text-muted-foreground">厳選されたAIプロンプトを発見してください</p>
       </div>
 
-      {/* ランキングTOP3（いいね順・コピー数順のみ表示） */}
-      {(sort === 'likes' || sort === 'popular') && (
-        <div className="mb-6">
-          <p className="text-sm font-semibold mb-3 flex items-center gap-1.5">
-            {sort === 'likes'
-              ? <><Heart className="w-4 h-4 text-pink-400" />いいねランキング TOP3</>
-              : <><TrendingUp className="w-4 h-4 text-violet-400" />コピー数ランキング TOP3</>
-            }
-          </p>
-          <RankingTop3 sort={sort} />
-        </div>
-      )}
+      {/* ── 検索バー ── */}
+      <form method="GET" action="/prompts" className="relative max-w-xl mb-6">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          name="q"
+          defaultValue={q}
+          placeholder="タイトル・説明・プロンプト内容で検索..."
+          className="w-full pl-9 pr-24 py-2.5 rounded-xl bg-card border border-border text-sm
+                     text-foreground placeholder:text-muted-foreground
+                     focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+        />
+        {sort !== 'new' && <input type="hidden" name="sort" value={sort} />}
+        {genre !== 'all' && <input type="hidden" name="genre" value={genre} />}
+        <button
+          type="submit"
+          className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-medium
+                     rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition-colors"
+        >
+          検索
+        </button>
+      </form>
 
-      {/* 検索・ソート */}
-      <div className="flex flex-col gap-4 mb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <Suspense fallback={<div className="h-9 w-64 bg-card border border-border rounded-lg animate-pulse" />}>
-            <SearchBox />
-          </Suspense>
-          <SortFilter current={sort} genre={genre} q={q} />
+      {/* ── 並び順タブ ── */}
+      <div className="mb-6">
+        <p className="text-xs text-muted-foreground mb-2 font-medium">並び順</p>
+        <div className="flex gap-2 flex-wrap">
+          {SORT_OPTIONS.map(({ value, label, icon: Icon }) => {
+            const isActive = sort === value
+            return (
+              <a
+                key={value}
+                href={buildUrl({ sort: value })}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
+                            transition-all duration-200 border no-underline
+                            ${isActive
+                    ? 'bg-gradient-to-r from-violet-600 to-cyan-600 text-white border-transparent shadow-md shadow-violet-500/30'
+                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-violet-400/50'
+                  }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </a>
+            )
+          })}
         </div>
-        {q && (
-          <p className="text-sm text-muted-foreground flex items-center gap-1.5">
-            <Search className="w-3.5 h-3.5" />
-            「<strong className="text-foreground">{q}</strong>」の検索結果
-          </p>
-        )}
-        <Suspense fallback={<div className="h-8 bg-card rounded-full animate-pulse w-full max-w-lg" />}>
-          <GenreFilter />
-        </Suspense>
       </div>
 
-      {/* プロンプト一覧 - keyでsort変更時に必ず再レンダリング */}
+      {/* ── ジャンルフィルター ── */}
+      <div className="mb-8">
+        <p className="text-xs text-muted-foreground mb-2 font-medium">ジャンル</p>
+        <div className="flex flex-wrap gap-2">
+          {allGenres.map(g => {
+            const IconComponent = Icons[g.icon as keyof typeof Icons] as LucideIcon
+            const isActive = genre === g.slug
+            return (
+              <a
+                key={g.slug}
+                href={buildUrl({ genre: g.slug })}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+                            transition-all duration-200 border no-underline
+                            ${isActive
+                    ? 'bg-gradient-to-r from-violet-600 to-cyan-600 border-transparent text-white shadow-lg shadow-violet-500/25'
+                    : 'bg-card border-border text-muted-foreground hover:border-violet-500/50 hover:text-foreground'
+                  }`}
+              >
+                {IconComponent && <IconComponent className={`w-3.5 h-3.5 ${isActive ? 'text-white' : g.color}`} />}
+                {g.name}
+              </a>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ── 検索中ラベル ── */}
+      {q && (
+        <p className="text-sm text-muted-foreground mb-4 flex items-center gap-1.5">
+          <Search className="w-3.5 h-3.5" />
+          「<strong className="text-foreground">{q}</strong>」の検索結果
+          <a href={buildUrl({ q: '' })} className="ml-1 text-violet-400 hover:text-violet-300 text-xs">クリア</a>
+        </p>
+      )}
+
+      {/* ── プロンプト一覧 ── */}
       <Suspense
-        key={`${genre ?? 'all'}-${q ?? ''}-${sort}`}
+        key={`${genre}-${q}-${sort}`}
         fallback={
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
