@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.promptshare.app",
+    "sha256_cert_fingerprints": [
+      "32:63:BA:0F:83:C9:7B:79:FF:49:F3:19:75:13:E0:BE:8B:70:AE:46:3D:D4:A3:E4:33:15:77:C3:5C:7C:27:D2"
+    ]
+  }
+}]
