@@ -1,0 +1,65 @@
+name: Android APK Build (TWA)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'twa/**'
+      - '.github/workflows/android-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configure Bubblewrap
+        run: |
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json << 'EOF'
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_SDK_ROOT"
+          }
+          EOF
+
+      - name: Generate Android project
+        working-directory: twa
+        run: |
+          bubblewrap init \
+            --manifest https://prompt-share-rosy.vercel.app/manifest.json \
+            --directory android-project \
+            --skipPwaValidation
+
+      - name: Build debug APK
+        working-directory: twa/android-project
+        run: |
+          echo "android.useAndroidX=true" >> local.properties
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prompt-share-debug-apk
+          path: twa/android-project/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
