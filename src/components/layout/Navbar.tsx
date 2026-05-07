@@ -11,13 +11,15 @@ import { signOut } from '@/lib/actions/auth'
 
 export default function Navbar() {
   const [user, setUser] = useState<SupabaseUser | null>(null)
+  const [loaded, setLoaded] = useState(false)
   const pathname = usePathname()
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    // onAuthStateChange は INITIAL_SESSION イベントで即座に現在の認証状態を返す
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
+      setLoaded(true)
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -38,7 +40,7 @@ export default function Navbar() {
               探す
             </Button>
           </Link>
-          {user && (
+          {loaded && user && (
             <>
               <Link href="/favorites">
                 <Button variant={pathname === '/favorites' ? 'secondary' : 'ghost'} size="sm">
@@ -57,7 +59,13 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          {user ? (
+          {!loaded ? (
+            // 認証状態が確定するまでスケルトン表示（ちらつき防止）
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-16 rounded-md bg-muted animate-pulse" />
+              <div className="h-7 w-14 rounded-md bg-muted animate-pulse" />
+            </div>
+          ) : user ? (
             <>
               <Link href="/prompts/new">
                 <Button size="sm" className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 border-0">
