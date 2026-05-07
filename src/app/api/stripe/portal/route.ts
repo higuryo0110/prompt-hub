@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 
 export async function POST() {
   const supabase = await createClient()
@@ -17,6 +17,7 @@ export async function POST() {
     return NextResponse.json({ error: 'No subscription found' }, { status: 400 })
   }
 
+  const stripe = getStripe()
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
     return_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://prompt-share-rosy.vercel.app'}/dashboard`,

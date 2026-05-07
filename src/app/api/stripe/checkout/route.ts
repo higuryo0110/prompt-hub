@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { stripe, PREMIUM_PRICE_ID } from '@/lib/stripe'
+import { getStripe, PREMIUM_PRICE_ID } from '@/lib/stripe'
 
 export async function POST() {
   const supabase = await createClient()
@@ -16,6 +16,7 @@ export async function POST() {
     .eq('id', user.id)
     .single()
 
+  const stripe = getStripe()
   let customerId = profile?.stripe_customer_id
 
   if (!customerId) {
