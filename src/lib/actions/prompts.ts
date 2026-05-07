@@ -9,6 +9,26 @@ export async function createPrompt(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'ログインが必要です' }
 
+  // プレミアムチェック: フリーユーザーは月3件まで
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_premium')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile?.is_premium) {
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
+    const { count } = await supabase
+      .from('prompts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('created_at', startOfMonth)
+
+    if ((count ?? 0) >= 3) {
+      return { error: 'フリープランの月3件の上限に達しました。プレミアムプランにアップグレードしてください。', upgrade: true }
+    }
+  }
+
   const title = formData.get('title') as string
   const description = formData.get('description') as string
   const content = formData.get('content') as string

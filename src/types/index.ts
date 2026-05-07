@@ -12,6 +12,9 @@ export type Profile = {
   avatar_url: string | null
   bio: string | null
   created_at: string
+  is_premium?: boolean
+  premium_until?: string | null
+  stripe_customer_id?: string | null
 }
 
 export type Prompt = {

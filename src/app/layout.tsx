@@ -81,6 +81,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }
           `
         }} />
+        {process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && !process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID.includes('YOUR_PUBLISHER') && (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </body>
     </html>
   )

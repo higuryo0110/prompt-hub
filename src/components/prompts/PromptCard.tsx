@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Heart, Copy, Bot, User } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import PremiumBadge from '@/components/ui/PremiumBadge'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import * as Icons from 'lucide-react'
@@ -67,9 +68,10 @@ export default function PromptCard({ prompt, rank }: { prompt: PromptWithDetails
           </div>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <User className="w-3 h-3" />
               <span>{prompt.profile?.username ?? '匿名'}</span>
+              {prompt.profile?.is_premium && <PremiumBadge size="xs" />}
             </div>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">

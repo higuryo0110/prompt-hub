@@ -1,9 +1,11 @@
+import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import PromptCard from '@/components/prompts/PromptCard'
+import AdBanner from '@/components/ads/AdBanner'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import { Suspense } from 'react'
-import { Search, Clock, Heart, TrendingUp, Copy, LayoutGrid } from 'lucide-react'
+import { Search, Clock, Heart, Copy, LayoutGrid } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -17,7 +19,7 @@ const SORT_OPTIONS = [
   { value: 'popular', label: 'コピー数順', icon: Copy },
 ]
 
-async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort?: string }) {
+async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort?: string }): Promise<React.ReactElement> {
   const supabase = await createClient()
 
   let query = supabase
@@ -58,17 +60,29 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
     )
   }
 
+  const withAds: React.ReactNode[] = []
+  prompts.forEach((prompt, index) => {
+    withAds.push(
+      <PromptCard
+        key={prompt.id}
+        prompt={prompt}
+        rank={sort !== 'new' && sort !== undefined && index < 3 ? index + 1 : undefined}
+      />
+    )
+    if (index === 7 || index === 19) {
+      withAds.push(
+        <div key={`ad-${index}`} className="col-span-full">
+          <AdBanner slot="1234567890" format="horizontal" className="max-w-2xl mx-auto" />
+        </div>
+      )
+    }
+  })
+
   return (
     <>
       <p className="text-sm text-muted-foreground mb-4">{prompts.length}件のプロンプト</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {prompts.map((prompt, index) => (
-          <PromptCard
-            key={prompt.id}
-            prompt={prompt}
-            rank={sort !== 'new' && sort !== undefined && index < 3 ? index + 1 : undefined}
-          />
-        ))}
+        {withAds}
       </div>
     </>
   )

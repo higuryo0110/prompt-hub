@@ -3,20 +3,35 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PenSquare, Copy, Heart, Pencil, Trash2, Bot } from 'lucide-react'
+import PremiumBadge from '@/components/ui/PremiumBadge'
+import { PenSquare, Copy, Heart, Pencil, Trash2, Bot, Crown, Sparkles } from 'lucide-react'
 import { GENRES } from '@/lib/genres'
+import { PLANS } from '@/lib/stripe'
 import { deletePrompt } from '@/lib/actions/prompts'
 import type { Prompt } from '@/types'
+import UpgradeButton from '@/components/dashboard/UpgradeButton'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ upgraded?: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const params = await searchParams
+  const justUpgraded = params.upgraded === '1'
 
   const [{ data: profile }, { data: prompts }] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('prompts').select('*, favorites(count)').eq('user_id', user.id).order('created_at', { ascending: false }),
   ])
+
+  const isPremium = profile?.is_premium ?? false
+
+  // 今月の投稿数チェック
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const thisMonthCount = (prompts ?? []).filter(p => p.created_at >= startOfMonth).length
+  const freeLimit = PLANS.free.limits.postsPerMonth
+  const remainingPosts = isPremium ? Infinity : Math.max(0, freeLimit - thisMonthCount)
 
   const totalFavorites = (prompts ?? []).reduce((acc, p) => {
     const count = Array.isArray(p.favorites) ? (p.favorites[0] as { count: number })?.count ?? 0 : 0
@@ -26,10 +41,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-12">
+      {justUpgraded && (
+        <div className="mb-6 p-4 rounded-xl bg-yellow-400/10 border border-yellow-400/30 flex items-center gap-3">
+          <Crown className="w-5 h-5 text-yellow-400 shrink-0" />
+          <p className="text-sm font-medium">プレミアムプランへのアップグレードありがとうございます！全機能がご利用いただけます。</p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">マイページ</h1>
-          <p className="text-muted-foreground mt-1">@{profile?.username ?? user.email}</p>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-3xl font-bold">マイページ</h1>
+            {isPremium && <PremiumBadge />}
+          </div>
+          <p className="text-muted-foreground">@{profile?.username ?? user.email}</p>
         </div>
         <Link href="/prompts/new">
           <Button className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-500 hover:to-cyan-500 border-0">
@@ -38,6 +63,39 @@ export default async function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* プレミアムバナー（フリーユーザー向け） */}
+      {!isPremium && (
+        <div className="mb-8 p-5 rounded-2xl bg-gradient-to-r from-violet-900/40 to-cyan-900/40
+                        border border-violet-500/30 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-yellow-400/15 flex items-center justify-center shrink-0">
+              <Crown className="w-5 h-5 text-yellow-400" />
+            </div>
+            <div>
+              <p className="font-semibold">プレミアムプランで無制限に投稿</p>
+              <p className="text-sm text-muted-foreground">
+                今月あと<strong className="text-foreground">{remainingPosts}</strong>件投稿できます
+                （フリープラン: 月{freeLimit}件まで）
+              </p>
+            </div>
+          </div>
+          <UpgradeButton />
+        </div>
+      )}
+
+      {/* プレミアム管理（プレミアムユーザー向け） */}
+      {isPremium && profile?.premium_until && (
+        <div className="mb-8 p-4 rounded-xl bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-yellow-400" />
+            <p className="text-sm">
+              プレミアム有効期限: {new Date(profile.premium_until).toLocaleDateString('ja-JP')}
+            </p>
+          </div>
+          <UpgradeButton isManage />
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-10">
