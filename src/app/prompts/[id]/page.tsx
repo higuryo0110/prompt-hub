@@ -7,6 +7,7 @@ import CopyButton from '@/components/prompts/CopyButton'
 import PurchaseButton from '@/components/prompts/PurchaseButton'
 import PremiumBadge from '@/components/ui/PremiumBadge'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
+import AffiliateStrip from '@/components/ads/AffiliateStrip'
 import Link from 'next/link'
 import { GENRES } from '@/lib/genres'
 import * as Icons from 'lucide-react'
@@ -211,6 +212,11 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
         <div className="hidden lg:block w-64 shrink-0 sticky top-24">
           <AffiliateSidebar placement="prompt-detail" />
         </div>
+      </div>
+
+      {/* プロンプト下部 横長バナー広告 */}
+      <div className="mt-6 max-w-4xl">
+        <AffiliateStrip promptId={id} />
       </div>
     </div>
   )
