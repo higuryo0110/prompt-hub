@@ -22,7 +22,6 @@ export default function Footer() {
           </div>
           <div className="flex gap-4">
             <Link href="/prompts" className="hover:text-foreground transition-colors">プロンプト一覧</Link>
-            <Link href="/pricing" className="hover:text-foreground transition-colors">料金プラン</Link>
             <Link href="/prompts/new" className="hover:text-foreground transition-colors">投稿する</Link>
           </div>
           <p>© {new Date().getFullYear()} プロンプトシェア</p>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Zap, PenSquare, Heart, LayoutDashboard, LogIn, LogOut, User, Crown } from 'lucide-react'
+import { Zap, PenSquare, Heart, LayoutDashboard, LogIn, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
@@ -16,7 +16,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const supabase = createClient()
-    // onAuthStateChange は INITIAL_SESSION イベントで即座に現在の認証状態を返す
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setUser(session?.user ?? null)
       setLoaded(true)
@@ -40,13 +39,6 @@ export default function Navbar() {
               探す
             </Button>
           </Link>
-          <Link href="/pricing">
-            <Button variant={pathname === '/pricing' ? 'secondary' : 'ghost'} size="sm"
-                    className={pathname !== '/pricing' ? 'text-yellow-400 hover:text-yellow-300' : ''}>
-              <Crown className="w-4 h-4 mr-1" />
-              プレミアム
-            </Button>
-          </Link>
           {loaded && user && (
             <>
               <Link href="/favorites">
@@ -67,7 +59,6 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2">
           {!loaded ? (
-            // 認証状態が確定するまでスケルトン表示（ちらつき防止）
             <div className="flex items-center gap-2">
               <div className="h-7 w-16 rounded-md bg-muted animate-pulse" />
               <div className="h-7 w-14 rounded-md bg-muted animate-pulse" />

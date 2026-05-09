@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import FavoriteButton from '@/components/prompts/FavoriteButton'
 import CopyButton from '@/components/prompts/CopyButton'
 import PurchaseButton from '@/components/prompts/PurchaseButton'
-import PremiumBadge from '@/components/ui/PremiumBadge'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import AffiliateStrip from '@/components/ads/AffiliateStrip'
 import A8Banner from '@/components/ads/A8Banner'
@@ -121,7 +120,6 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
                 <span className="flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5" />
                   {prompt.profile?.username ?? '匿名'}
-                  {prompt.profile?.is_premium && <PremiumBadge size="xs" />}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5" />
