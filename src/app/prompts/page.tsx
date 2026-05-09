@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import PromptCard from '@/components/prompts/PromptCard'
 import AdBanner from '@/components/ads/AdBanner'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
+import A8Banner from '@/components/ads/A8Banner'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import { Suspense } from 'react'
@@ -218,8 +219,11 @@ export default async function PromptsPage({ searchParams }: Props) {
         </div>
 
         {/* サイドバー（デスクトップのみ） */}
-        <div className="hidden xl:block w-64 shrink-0 sticky top-24">
+        <div className="hidden xl:block w-64 shrink-0 sticky top-24 space-y-4">
           <AffiliateSidebar placement="prompt-list" />
+          <div className="flex flex-col gap-2 items-center pt-2">
+            <A8Banner size="small" />
+          </div>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import PurchaseButton from '@/components/prompts/PurchaseButton'
 import PremiumBadge from '@/components/ui/PremiumBadge'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import AffiliateStrip from '@/components/ads/AffiliateStrip'
+import A8Banner from '@/components/ads/A8Banner'
 import Link from 'next/link'
 import { GENRES } from '@/lib/genres'
 import * as Icons from 'lucide-react'
@@ -209,8 +210,12 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
         </div>
 
         {/* サイドバー */}
-        <div className="hidden lg:block w-64 shrink-0 sticky top-24">
+        <div className="hidden lg:block w-64 shrink-0 sticky top-24 space-y-4">
           <AffiliateSidebar placement="prompt-detail" />
+          <div className="flex flex-col gap-2 items-center pt-1">
+            <A8Banner size="small" />
+            <A8Banner size="small" />
+          </div>
         </div>
       </div>
 

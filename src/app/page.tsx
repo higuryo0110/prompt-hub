@@ -6,6 +6,7 @@ import NewsletterForm from '@/components/newsletter/NewsletterForm'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import HomeAffiliateGrid from '@/components/ads/HomeAffiliateGrid'
 import HomeAffiliateStrip from '@/components/ads/HomeAffiliateStrip'
+import A8Banner from '@/components/ads/A8Banner'
 import { GENRES } from '@/lib/genres'
 import { ArrowRight, Zap, Users, TrendingUp, Mail } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
@@ -143,6 +144,10 @@ export default async function HomePage() {
       <section className="py-10 px-4">
         <div className="max-w-7xl mx-auto">
           <HomeAffiliateGrid />
+          {/* A8.net バナー */}
+          <div className="mt-6 flex flex-wrap gap-3 items-center justify-center">
+            <A8Banner size="wide" />
+          </div>
         </div>
       </section>
 

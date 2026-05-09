@@ -1,4 +1,5 @@
 import { ExternalLink, Sparkles } from 'lucide-react'
+import A8Banner from './A8Banner'
 
 type AffiliateAd = {
   id: string
@@ -160,6 +161,12 @@ export default function AffiliateSidebar({ placement = 'sidebar' }: { placement?
           </div>
         </a>
       ))}
+
+      {/* A8.net バナー広告 */}
+      <div className="flex flex-col gap-2 items-center pt-1">
+        <A8Banner size="small" />
+        <A8Banner size="small" />
+      </div>
 
       {/* スポンサー枠直接掲載 */}
       <a
