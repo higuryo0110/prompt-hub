@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 type A8BannerProps = {
-  size?: 'small' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect-both'
+  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect-both'
   className?: string
 }
 
@@ -56,6 +56,28 @@ export default function A8Banner({ size = 'small', className = '' }: A8BannerPro
       <div className={`flex flex-wrap gap-4 justify-center ${className}`}>
         <A8Banner size="rect" />
         <A8Banner size="rect2" />
+      </div>
+    )
+  }
+
+  // 100x60 小バナー（2枚目）
+  if (size === 'small2') {
+    return (
+      <div className={`inline-block ${className}`}>
+        <a
+          href="https://px.a8.net/svt/ejp?a8mat=4B3MEV+3B2PRM+5VDQ+BYDTT"
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            style={{ border: 0 }}
+            width={100}
+            height={60}
+            alt=""
+            src="https://www26.a8.net/svt/bgt?aid=260509495200&wid=001&eno=01&mid=s00000027395002008000&mc=1"
+          />
+        </a>
+        <img style={{ border: 0 }} width={1} height={1} src="https://www14.a8.net/0.gif?a8mat=4B3MEV+3B2PRM+5VDQ+BYDTT" alt="" />
       </div>
     )
   }

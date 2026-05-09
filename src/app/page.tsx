@@ -146,7 +146,10 @@ export default async function HomePage() {
           <HomeAffiliateGrid />
           {/* A8.net バナー */}
           <div className="mt-6 flex flex-wrap gap-3 items-center justify-center">
-            <A8Banner size="wide" />
+            <A8Banner size="small" />
+            <A8Banner size="small2" />
+            <A8Banner size="small" />
+            <A8Banner size="small2" />
           </div>
         </div>
       </section>
