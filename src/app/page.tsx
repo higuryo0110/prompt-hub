@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import PromptCard from '@/components/prompts/PromptCard'
 import NewsletterForm from '@/components/newsletter/NewsletterForm'
+import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
+import HomeAffiliateGrid from '@/components/ads/HomeAffiliateGrid'
+import HomeAffiliateStrip from '@/components/ads/HomeAffiliateStrip'
 import { GENRES } from '@/lib/genres'
 import { ArrowRight, Zap, Users, TrendingUp, Mail } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
@@ -136,47 +139,68 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Popular */}
-      {topPrompts.length > 0 && (
-        <section className="py-16 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">🔥 人気のプロンプト</h2>
-              <Link href="/prompts?sort=popular">
-                <Button variant="ghost" size="sm" className="text-muted-foreground">
-                  すべて見る <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {topPrompts.map(prompt => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
+      {/* PR・おすすめAIツール（横並びグリッド） */}
+      <section className="py-10 px-4">
+        <div className="max-w-7xl mx-auto">
+          <HomeAffiliateGrid />
+        </div>
+      </section>
 
-      {/* Latest */}
-      {latestPrompts.length > 0 && (
-        <section className="py-16 px-4 bg-muted/30">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold">✨ 新着プロンプト</h2>
-              <Link href="/prompts">
-                <Button variant="ghost" size="sm" className="text-muted-foreground">
-                  すべて見る <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {latestPrompts.map(prompt => (
-                <PromptCard key={prompt.id} prompt={prompt} />
-              ))}
-            </div>
+      {/* Popular + Latest + Sidebar */}
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex gap-8 items-start">
+          {/* メインコンテンツ */}
+          <div className="flex-1 min-w-0">
+            {/* Popular */}
+            {topPrompts.length > 0 && (
+              <section className="py-10">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-bold">🔥 人気のプロンプト</h2>
+                  <Link href="/prompts?sort=popular">
+                    <Button variant="ghost" size="sm" className="text-muted-foreground">
+                      すべて見る <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                  {topPrompts.map(prompt => (
+                    <PromptCard key={prompt.id} prompt={prompt} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Latest */}
+            {latestPrompts.length > 0 && (
+              <section className="py-10 border-t border-border">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-bold">✨ 新着プロンプト</h2>
+                  <Link href="/prompts">
+                    <Button variant="ghost" size="sm" className="text-muted-foreground">
+                      すべて見る <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+                  {latestPrompts.map(prompt => (
+                    <PromptCard key={prompt.id} prompt={prompt} />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
-        </section>
-      )}
+
+          {/* サイドバー（xl以上で表示） */}
+          <div className="hidden xl:block w-64 shrink-0 sticky top-24 py-10">
+            <AffiliateSidebar placement="home-sidebar" />
+          </div>
+        </div>
+      </div>
+
+      {/* PR横長バナー（新着とメルマガの間） */}
+      <div className="max-w-4xl mx-auto px-4 pb-8">
+        <HomeAffiliateStrip />
+      </div>
 
       {/* メルマガ登録 */}
       <section className="py-16 px-4 border-t border-border">
