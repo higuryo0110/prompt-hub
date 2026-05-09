@@ -2,6 +2,7 @@ import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import PromptCard from '@/components/prompts/PromptCard'
 import AdBanner from '@/components/ads/AdBanner'
+import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import type { PromptWithDetails } from '@/types'
 import { GENRES } from '@/lib/genres'
 import { Suspense } from 'react'
@@ -199,19 +200,28 @@ export default async function PromptsPage({ searchParams }: Props) {
         </p>
       )}
 
-      {/* ── プロンプト一覧 ── */}
-      <Suspense
-        key={`${genre}-${q}-${sort}`}
-        fallback={
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl h-56 animate-pulse" />
-            ))}
-          </div>
-        }
-      >
-        <PromptList genre={genre} q={q} sort={sort} />
-      </Suspense>
+      {/* ── プロンプト一覧 + サイドバー ── */}
+      <div className="flex gap-8 items-start">
+        <div className="flex-1 min-w-0">
+          <Suspense
+            key={`${genre}-${q}-${sort}`}
+            fallback={
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-card border border-border rounded-2xl h-56 animate-pulse" />
+                ))}
+              </div>
+            }
+          >
+            <PromptList genre={genre} q={q} sort={sort} />
+          </Suspense>
+        </div>
+
+        {/* サイドバー（デスクトップのみ） */}
+        <div className="hidden xl:block w-64 shrink-0 sticky top-24">
+          <AffiliateSidebar ref="prompt-list" />
+        </div>
+      </div>
     </div>
   )
 }

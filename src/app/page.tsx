@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import PromptCard from '@/components/prompts/PromptCard'
+import NewsletterForm from '@/components/newsletter/NewsletterForm'
 import { GENRES } from '@/lib/genres'
-import { ArrowRight, Zap, Users, TrendingUp } from 'lucide-react'
+import { ArrowRight, Zap, Users, TrendingUp, Mail } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -176,6 +177,20 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* メルマガ登録 */}
+      <section className="py-16 px-4 border-t border-border">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="w-12 h-12 rounded-2xl bg-violet-500/15 flex items-center justify-center mx-auto mb-4">
+            <Mail className="w-6 h-6 text-violet-400" />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">週刊AIプロンプト通信</h2>
+          <p className="text-muted-foreground mb-6">
+            毎週金曜日に厳選プロンプト5選と最新AIトレンドをお届けします。登録無料・いつでも解除可能。
+          </p>
+          <NewsletterForm />
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="py-24 px-4">

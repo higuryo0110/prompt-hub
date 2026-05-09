@@ -34,12 +34,14 @@ export async function createPrompt(formData: FormData) {
   const content = formData.get('content') as string
   const genre_id = parseInt(formData.get('genre_id') as string)
   const ai_model = formData.get('ai_model') as string
+  const priceRaw = parseInt(formData.get('price') as string || '0')
+  const price = isNaN(priceRaw) || priceRaw <= 0 ? null : priceRaw
 
   if (!title || !content || !genre_id) return { error: '必須項目を入力してください' }
 
   const { data, error } = await supabase
     .from('prompts')
-    .insert({ user_id: user.id, title, description, content, genre_id, ai_model })
+    .insert({ user_id: user.id, title, description, content, genre_id, ai_model, price })
     .select()
     .single()
 
