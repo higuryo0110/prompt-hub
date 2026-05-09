@@ -1,11 +1,33 @@
 /* eslint-disable @next/next/no-img-element */
 
 type A8BannerProps = {
-  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect-both'
+  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect-both' | 'leaderboard'
   className?: string
 }
 
 export default function A8Banner({ size = 'small', className = '' }: A8BannerProps) {
+  // 728x90 リーダーボード
+  if (size === 'leaderboard') {
+    return (
+      <div className={`w-full overflow-x-auto text-center ${className}`}>
+        <a
+          href="https://px.a8.net/svt/ejp?a8mat=4B3MEV+6FLN3M+ONS+TVBF5"
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            style={{ border: 0, maxWidth: '100%', height: 'auto' }}
+            width={728}
+            height={90}
+            alt=""
+            src="https://www26.a8.net/svt/bgt?aid=260509495389&wid=001&eno=01&mid=s00000003196005017000&mc=1"
+          />
+        </a>
+        <img style={{ border: 0 }} width={1} height={1} src="https://www18.a8.net/0.gif?a8mat=4B3MEV+6FLN3M+ONS+TVBF5" alt="" />
+      </div>
+    )
+  }
+
   // 300x250 レクタングル（1枚目）
   if (size === 'rect') {
     return (

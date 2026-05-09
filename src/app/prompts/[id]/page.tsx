@@ -73,10 +73,15 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="mb-6">
+      <div className="mb-4">
         <Link href="/prompts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           ← プロンプト一覧へ戻る
         </Link>
+      </div>
+
+      {/* リーダーボード広告 */}
+      <div className="mb-6">
+        <A8Banner size="leaderboard" />
       </div>
 
       {justPurchased && (

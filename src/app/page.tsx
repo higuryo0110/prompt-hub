@@ -115,6 +115,11 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* リーダーボード広告（ヒーロー直下） */}
+      <div className="px-4 pb-4 max-w-7xl mx-auto">
+        <A8Banner size="leaderboard" />
+      </div>
+
       {/* Genres */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-7xl mx-auto">

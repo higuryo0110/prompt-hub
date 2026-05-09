@@ -118,6 +118,11 @@ export default async function PromptsPage({ searchParams }: Props) {
         <p className="text-muted-foreground">厳選されたAIプロンプトを発見してください</p>
       </div>
 
+      {/* リーダーボード広告 */}
+      <div className="mb-6">
+        <A8Banner size="leaderboard" />
+      </div>
+
       {/* ── 検索バー ── */}
       <form method="GET" action="/prompts" className="relative max-w-xl mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />

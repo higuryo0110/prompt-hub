@@ -6,7 +6,11 @@ export default function Footer() {
   return (
     <footer className="border-t border-border mt-12 py-10 px-4 bg-muted/20">
       <div className="max-w-7xl mx-auto">
-        {/* A8.net バナー行 */}
+        {/* リーダーボード */}
+        <div className="mb-6">
+          <A8Banner size="leaderboard" />
+        </div>
+        {/* 小バナー行 */}
         <div className="flex flex-wrap gap-3 items-center justify-center mb-8">
           <A8Banner size="small" />
           <A8Banner size="small2" />
