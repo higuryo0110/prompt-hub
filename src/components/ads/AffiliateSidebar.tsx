@@ -57,7 +57,7 @@ function buildClickUrl(ad: AffiliateAd, ref: string) {
   return `/api/affiliate/click?id=${ad.id}&ref=${ref}&url=${encodeURIComponent(ad.url)}`
 }
 
-export default function AffiliateSidebar({ ref = 'sidebar' }: { ref?: string }) {
+export default function AffiliateSidebar({ placement = 'sidebar' }: { placement?: string }) {
   return (
     <aside className="w-full space-y-3">
       <div className="flex items-center gap-1.5 mb-2">
@@ -68,7 +68,7 @@ export default function AffiliateSidebar({ ref = 'sidebar' }: { ref?: string }) 
       {ADS.map((ad) => (
         <a
           key={ad.id}
-          href={buildClickUrl(ad, ref)}
+          href={buildClickUrl(ad, placement)}
           target="_blank"
           rel="noopener noreferrer sponsored"
           className={`block relative rounded-xl overflow-hidden bg-gradient-to-br ${ad.gradient}

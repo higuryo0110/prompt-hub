@@ -219,7 +219,7 @@ export default async function PromptsPage({ searchParams }: Props) {
 
         {/* サイドバー（デスクトップのみ） */}
         <div className="hidden xl:block w-64 shrink-0 sticky top-24">
-          <AffiliateSidebar ref="prompt-list" />
+          <AffiliateSidebar placement="prompt-list" />
         </div>
       </div>
     </div>

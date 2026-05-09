@@ -209,7 +209,7 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
 
         {/* サイドバー */}
         <div className="hidden lg:block w-64 shrink-0 sticky top-24">
-          <AffiliateSidebar ref="prompt-detail" />
+          <AffiliateSidebar placement="prompt-detail" />
         </div>
       </div>
     </div>
