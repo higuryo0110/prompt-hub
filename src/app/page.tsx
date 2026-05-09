@@ -175,6 +175,12 @@ export default async function HomePage() {
               </section>
             )}
 
+            {/* 人気と新着の間のA8.net 300x250バナー */}
+            <div className="py-6 border-t border-border flex flex-wrap gap-4 justify-center">
+              <A8Banner size="rect" />
+              <A8Banner size="rect" />
+            </div>
+
             {/* Latest */}
             {latestPrompts.length > 0 && (
               <section className="py-10 border-t border-border">

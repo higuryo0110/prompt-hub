@@ -164,7 +164,7 @@ export default function AffiliateSidebar({ placement = 'sidebar' }: { placement?
 
       {/* A8.net バナー広告 */}
       <div className="flex flex-col gap-2 items-center pt-1">
-        <A8Banner size="small" />
+        <A8Banner size="rect" />
         <A8Banner size="small" />
       </div>
 
