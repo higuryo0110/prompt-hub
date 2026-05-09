@@ -214,7 +214,7 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
           <AffiliateSidebar placement="prompt-detail" />
           <div className="flex flex-col gap-3 items-center pt-1">
             <A8Banner size="rect" />
-            <A8Banner size="small" />
+            <A8Banner size="rect2" />
           </div>
         </div>
       </div>
