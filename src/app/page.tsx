@@ -145,6 +145,11 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* リーダーボード広告2（ジャンル直下） */}
+      <div className="px-4 py-4 max-w-7xl mx-auto">
+        <A8Banner size="leaderboard2" />
+      </div>
+
       {/* PR・おすすめAIツール（横並びグリッド） */}
       <section className="py-10 px-4">
         <div className="max-w-7xl mx-auto">

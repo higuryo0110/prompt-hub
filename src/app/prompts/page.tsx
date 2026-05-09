@@ -221,6 +221,10 @@ export default async function PromptsPage({ searchParams }: Props) {
           >
             <PromptList genre={genre} q={q} sort={sort} />
           </Suspense>
+          {/* プロンプト一覧下部 リーダーボード2 */}
+          <div className="mt-8">
+            <A8Banner size="leaderboard2" />
+          </div>
         </div>
 
         {/* サイドバー（デスクトップのみ） */}
