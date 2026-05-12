@@ -55,7 +55,7 @@ export default async function Image({ params }: { params: { slug: string } }) {
           {desc.slice(0, 100)}
         </div>
         <div style={{ position: 'absolute', bottom: 40, right: 70, fontSize: 18, color: '#64748b' }}>
-          prompt-share-rosy.vercel.app
+          promptshare.jp
         </div>
       </div>
     ),

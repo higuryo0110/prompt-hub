@@ -20,7 +20,7 @@ export async function POST() {
   const stripe = getStripe()
   const session = await stripe.billingPortal.sessions.create({
     customer: profile.stripe_customer_id,
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://prompt-share-rosy.vercel.app'}/dashboard`,
+    return_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://promptshare.jp'}/dashboard`,
     locale: 'ja',
   })
 

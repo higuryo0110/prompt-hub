@@ -2,7 +2,7 @@
  * サイト全体で使用する定数
  * カスタムドメイン取得後は SITE_URL のみを書き換えればOK
  */
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://prompt-share-rosy.vercel.app'
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://promptshare.jp'
 export const SITE_NAME = 'プロンプトシェア'
 export const SITE_NAME_EN = 'PromptShare'
 export const SITE_DESCRIPTION =

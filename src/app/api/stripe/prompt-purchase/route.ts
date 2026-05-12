@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   if (existing) return NextResponse.json({ error: 'Already purchased' }, { status: 400 })
 
   const stripe = getStripe()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://prompt-share-rosy.vercel.app'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://promptshare.jp'
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],

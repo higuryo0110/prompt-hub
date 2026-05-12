@@ -38,8 +38,8 @@ export async function POST() {
     payment_method_types: ['card'],
     line_items: [{ price: PREMIUM_PRICE_ID, quantity: 1 }],
     mode: 'subscription',
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://prompt-share-rosy.vercel.app'}/dashboard?upgraded=1`,
-    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://prompt-share-rosy.vercel.app'}/pricing`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://promptshare.jp'}/dashboard?upgraded=1`,
+    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://promptshare.jp'}/pricing`,
     locale: 'ja',
     subscription_data: {
       metadata: { supabase_user_id: user.id },

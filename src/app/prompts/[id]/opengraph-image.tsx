@@ -167,7 +167,7 @@ export default async function Image({ params }: { params: { id: string } }) {
             color: '#64748b',
           }}
         >
-          prompt-share-rosy.vercel.app
+          promptshare.jp
         </div>
       </div>
     ),
