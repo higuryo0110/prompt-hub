@@ -5,6 +5,7 @@ import { Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toggleFavorite } from '@/lib/actions/favorites'
 import { useRouter } from 'next/navigation'
+import { trackEvent, Events } from '@/lib/analytics'
 
 type Props = {
   promptId: string
@@ -22,9 +23,11 @@ export default function FavoriteButton({ promptId, initialFavorited, initialCoun
   const handleClick = async () => {
     if (!isLoggedIn) { router.push('/login'); return }
     setLoading(true)
+    const willFav = !isFavorited
     setIsFavorited(prev => !prev)
     setCount(prev => isFavorited ? prev - 1 : prev + 1)
     await toggleFavorite(promptId, isFavorited)
+    trackEvent(willFav ? Events.PROMPT_FAVORITE : Events.PROMPT_UNFAVORITE, { prompt_id: promptId })
     setLoading(false)
   }
 

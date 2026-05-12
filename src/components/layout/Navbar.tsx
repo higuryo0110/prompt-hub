@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Zap, PenSquare, Heart, LayoutDashboard, LogIn, LogOut, User } from 'lucide-react'
+import { Zap, PenSquare, Heart, LayoutDashboard, LogIn, LogOut, User, Trophy } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
@@ -37,6 +37,12 @@ export default function Navbar() {
           <Link href="/prompts">
             <Button variant={pathname.startsWith('/prompts') ? 'secondary' : 'ghost'} size="sm">
               探す
+            </Button>
+          </Link>
+          <Link href="/rankings">
+            <Button variant={pathname.startsWith('/rankings') ? 'secondary' : 'ghost'} size="sm">
+              <Trophy className="w-4 h-4 mr-1" />
+              ランキング
             </Button>
           </Link>
           {loaded && user && (

@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { Share2, Link as LinkIcon } from 'lucide-react'
 import { toast } from 'sonner'
+import { trackEvent, Events } from '@/lib/analytics'
 
 type Props = {
   url: string
@@ -11,6 +12,9 @@ type Props = {
 }
 
 export default function ShareButtons({ url, text, title }: Props) {
+  const trackShare = (channel: string) => {
+    trackEvent(Events.PROMPT_SHARE, { channel, url })
+  }
   const tweetText = encodeURIComponent(`${text}\n\n#プロンプトシェア #AI #プロンプト`)
   const tweetUrl = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(url)}`
   const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}`
@@ -20,6 +24,7 @@ export default function ShareButtons({ url, text, title }: Props) {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(url)
+      trackShare('link_copy')
       toast.success('リンクをコピーしました')
     } catch {
       toast.error('コピーできませんでした')
@@ -30,6 +35,7 @@ export default function ShareButtons({ url, text, title }: Props) {
     if (navigator.share) {
       try {
         await navigator.share({ title, text, url })
+        trackShare('native')
       } catch {
         // user canceled
       }
@@ -49,6 +55,7 @@ export default function ShareButtons({ url, text, title }: Props) {
           href={tweetUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackShare('twitter')}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-black text-white hover:bg-neutral-800 transition-colors"
         >
           <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -58,6 +65,7 @@ export default function ShareButtons({ url, text, title }: Props) {
           href={lineUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackShare('line')}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-green-500 text-white hover:bg-green-600 transition-colors"
         >
           LINE
@@ -66,6 +74,7 @@ export default function ShareButtons({ url, text, title }: Props) {
           href={fbUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackShare('facebook')}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >
           Facebook
@@ -74,6 +83,7 @@ export default function ShareButtons({ url, text, title }: Props) {
           href={hatebuUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackShare('hatebu')}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg bg-cyan-700 text-white hover:bg-cyan-800 transition-colors"
         >
           はてブ

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { incrementCopyCount } from '@/lib/actions/prompts'
+import { trackEvent, Events } from '@/lib/analytics'
 
 export default function CopyButton({ promptId, content }: { promptId: string; content: string }) {
   const [copied, setCopied] = useState(false)
@@ -12,6 +13,7 @@ export default function CopyButton({ promptId, content }: { promptId: string; co
     await navigator.clipboard.writeText(content)
     setCopied(true)
     await incrementCopyCount(promptId)
+    trackEvent(Events.PROMPT_COPY, { prompt_id: promptId, content_length: content.length })
     setTimeout(() => setCopied(false), 2000)
   }
 
