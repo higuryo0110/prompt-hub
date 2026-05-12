@@ -8,26 +8,74 @@ import HomeAffiliateGrid from '@/components/ads/HomeAffiliateGrid'
 import HomeAffiliateStrip from '@/components/ads/HomeAffiliateStrip'
 import A8Banner from '@/components/ads/A8Banner'
 import { GENRES } from '@/lib/genres'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, CATEGORY_META } from '@/lib/constants'
 import { ArrowRight, Zap, Users, TrendingUp, Mail } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
-const jsonLd = {
+const websiteJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'プロンプトシェア',
+  name: SITE_NAME,
   alternateName: 'PromptShare',
-  url: 'https://prompt-share-rosy.vercel.app',
-  description: 'プロンプトシェアは、業務委託・アプリ制作・画像生成・ライティングなど、あらゆるジャンルのAIプロンプトを無料で共有・発見できるプロンプト共有サービスです。',
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
   potentialAction: {
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: 'https://prompt-share-rosy.vercel.app/prompts?q={search_term_string}',
+      urlTemplate: `${SITE_URL}/prompts?q={search_term_string}`,
     },
     'query-input': 'required name=search_term_string',
   },
+}
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'プロンプトシェアとは何ですか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'プロンプトシェアは、ChatGPT・Claude・Gemini・Midjourneyなど主要AIに対応した高品質プロンプトを無料で発見・共有できるプロンプト共有サービスです。業務委託・アプリ制作・画像生成・ライティング・マーケティング・データ分析・教育など8カテゴリのプロンプトを揃えています。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'プロンプトシェアは無料で使えますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'はい、無料で利用できます。プロンプトの閲覧・コピーは登録不要、お気に入り登録・プロンプト投稿は無料アカウント登録のみで利用できます。一部、有料プロンプト（クリエイターが価格設定したもの）もありますが、無料プロンプトだけで実務をカバーできる量を揃えています。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'どのAIに対応していますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'ChatGPT (GPT-4o, GPT-4, GPT-3.5)、Claude (Opus 4.7, 3.5 Sonnet, 3 Opus)、Gemini 1.5 Pro、Midjourney、DALL-E 3、Stable Diffusionなど主要なテキスト・画像生成AIに対応したプロンプトを掲載しています。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'プロンプトはどのように使えばいいですか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '①プロンプト詳細ページで内容を確認、②「コピー」ボタンでクリップボードに保存、③お好みのAIチャット画面に貼り付けて送信、④必要に応じて変数（{業界}など）を自分用に書き換える、という流れで使えます。多くのプロンプトは役割設定・出力フォーマット指定済みで、コピペだけで即戦力です。',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '自分のプロンプトを投稿できますか？',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'はい、無料アカウント登録後、誰でもプロンプトを投稿できます。クリエイターは有料プロンプトとして価格を設定することも可能で、購入のたびに収益を得られます。',
+      },
+    },
+  ],
 }
 
 export default async function HomePage() {
@@ -62,7 +110,11 @@ export default async function HomePage() {
     <div className="min-h-screen">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       {/* Hero */}
       <section className="relative overflow-hidden py-24 px-4">
@@ -120,23 +172,33 @@ export default async function HomePage() {
         <A8Banner size="leaderboard" />
       </div>
 
-      {/* Genres */}
+      {/* Genres - 内部リンクのSEOハブ */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 text-center">ジャンルから探す</h2>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">カテゴリから探す</h2>
+            <p className="text-sm text-muted-foreground">
+              用途別に厳選されたプロンプトをカテゴリページで一気にチェック
+            </p>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {GENRES.map(genre => {
+              const meta = CATEGORY_META[genre.slug]
               const IconComponent = Icons[genre.icon as keyof typeof Icons] as LucideIcon
               return (
-                <Link key={genre.slug} href={`/prompts?genre=${genre.slug}`}>
-                  <div className="group bg-card border border-border rounded-xl p-4 flex items-center gap-3
-                                  hover:border-violet-500/50 transition-all duration-200 hover:-translate-y-0.5 card-glow">
-                    <div className={`w-9 h-9 rounded-lg bg-muted flex items-center justify-center ${genre.color}`}>
-                      {IconComponent && <IconComponent className="w-4 h-4" />}
+                <Link key={genre.slug} href={`/categories/${genre.slug}`}>
+                  <div className="group bg-card border border-border rounded-xl p-5 flex flex-col gap-2
+                                  hover:border-violet-500/50 transition-all duration-200 hover:-translate-y-0.5 card-glow h-full">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{meta?.emoji ?? '✨'}</span>
+                      <span className="font-bold text-base group-hover:text-violet-300 transition-colors">
+                        {genre.name}
+                      </span>
+                      {IconComponent && <IconComponent className={`w-4 h-4 ml-auto ${genre.color}`} />}
                     </div>
-                    <span className="font-medium text-sm group-hover:text-violet-300 transition-colors">
-                      {genre.name}
-                    </span>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {meta?.description?.slice(0, 60) ?? ''}
+                    </p>
                   </div>
                 </Link>
               )
@@ -236,6 +298,32 @@ export default async function HomePage() {
             毎週金曜日に厳選プロンプト5選と最新AIトレンドをお届けします。登録無料・いつでも解除可能。
           </p>
           <NewsletterForm />
+        </div>
+      </section>
+
+      {/* FAQ - SEOとUX両方の効果 */}
+      <section className="py-16 px-4 border-t border-border bg-muted/20">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2 text-center">よくある質問</h2>
+          <p className="text-sm text-muted-foreground text-center mb-10">
+            プロンプトシェアの使い方をまとめました
+          </p>
+          <div className="space-y-4">
+            {faqJsonLd.mainEntity.map((q, i) => (
+              <details
+                key={i}
+                className="group bg-card border border-border rounded-xl p-5 hover:border-violet-500/40 transition-colors"
+              >
+                <summary className="font-semibold cursor-pointer list-none flex items-center justify-between gap-3">
+                  <span className="text-base">Q. {q.name}</span>
+                  <span className="text-violet-400 text-xl group-open:rotate-45 transition-transform">+</span>
+                </summary>
+                <p className="mt-4 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {q.acceptedAnswer.text}
+                </p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 

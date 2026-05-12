@@ -4,13 +4,10 @@ import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { Toaster } from '@/components/ui/sonner'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/constants'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
-
-const SITE_URL = 'https://prompt-share-rosy.vercel.app'
-const SITE_NAME = 'プロンプトシェア'
-const SITE_DESCRIPTION = 'プロンプトシェアは、業務委託・アプリ制作・画像生成・ライティングなど、あらゆるジャンルのAIプロンプトを無料で共有・発見できるプロンプト共有サービスです。ChatGPT・Claude・Geminiなど主要AIに対応したプロンプトが揃っています。'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -19,11 +16,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords: [
-    'プロンプトシェア', 'プロンプト共有', 'AIプロンプト', 'プロンプト',
-    'ChatGPT', 'Claude', 'Gemini', '画像生成', 'プロンプト集',
-    'AI活用', 'プロンプトエンジニアリング', '業務効率化',
-  ],
+  keywords: [...SITE_KEYWORDS],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
@@ -59,10 +52,27 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const gaId = 'G-Q8EHLWH7BN'
 
+  // Organization + WebSite 構造化データ（全ページに付与）
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE_NAME,
+    alternateName: 'PromptShare',
+    url: SITE_URL,
+    logo: `${SITE_URL}/icons/icon-192x192.png`,
+    description: SITE_DESCRIPTION,
+    sameAs: [],
+  }
+
   return (
     <html lang="ja" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#7c3aed" />
+        {/* 構造化データ: Organization */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         {/* Google Analytics */}
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
         <script dangerouslySetInnerHTML={{ __html: `

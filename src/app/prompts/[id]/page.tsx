@@ -5,16 +5,20 @@ import { Button } from '@/components/ui/button'
 import FavoriteButton from '@/components/prompts/FavoriteButton'
 import CopyButton from '@/components/prompts/CopyButton'
 import PurchaseButton from '@/components/prompts/PurchaseButton'
+import PromptCard from '@/components/prompts/PromptCard'
+import ShareButtons from '@/components/prompts/ShareButtons'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import AffiliateStrip from '@/components/ads/AffiliateStrip'
 import A8Banner from '@/components/ads/A8Banner'
 import Link from 'next/link'
 import { GENRES } from '@/lib/genres'
+import { SITE_URL, SITE_NAME } from '@/lib/constants'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { Bot, User, Calendar, Copy, Pencil, Trash2, Lock } from 'lucide-react'
+import { Bot, User, Calendar, Copy, Pencil, Trash2, Lock, ChevronRight } from 'lucide-react'
 import { deletePrompt } from '@/lib/actions/prompts'
 import type { Metadata } from 'next'
+import type { PromptWithDetails } from '@/types'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -24,15 +28,32 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = await createClient()
   const { id } = await params
-  const { data } = await supabase.from('prompts').select('title,description').eq('id', id).single()
+  const { data } = await supabase
+    .from('prompts')
+    .select('title,description,ai_model')
+    .eq('id', id)
+    .single()
   const title = data?.title ?? 'プロンプト詳細'
-  const description = data?.description || `${title} - プロンプトシェアで公開されているAIプロンプトです。`
+  const aiModel = data?.ai_model ?? 'AI'
+  const description =
+    data?.description ||
+    `${title} - ${aiModel}用の高品質AIプロンプト。${SITE_NAME}で無料公開中。コピー&ペーストで即利用可能。`
   return {
     title,
     description,
-    openGraph: { title, description, type: 'article' },
-    twitter: { card: 'summary', title, description },
-    alternates: { canonical: `https://prompt-share-rosy.vercel.app/prompts/${id}` },
+    openGraph: {
+      title: `${title} | ${SITE_NAME}`,
+      description,
+      type: 'article',
+      url: `${SITE_URL}/prompts/${id}`,
+      siteName: SITE_NAME,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${title} | ${SITE_NAME}`,
+      description,
+    },
+    alternates: { canonical: `${SITE_URL}/prompts/${id}` },
   }
 }
 
@@ -52,16 +73,24 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const [{ count: favCount }, { data: myFav }, { data: myPurchase }] = await Promise.all([
+  const [{ count: favCount }, { data: myFav }, { data: myPurchase }, relatedRes] = await Promise.all([
     supabase.from('favorites').select('*', { count: 'exact', head: true }).eq('prompt_id', id),
     user ? supabase.from('favorites').select('*').eq('prompt_id', id).eq('user_id', user.id).maybeSingle() : Promise.resolve({ data: null }),
-    // 購入済みチェック (prompt_purchasesテーブルが存在する場合)
     (async () => {
       if (!user || !prompt.price) return { data: null }
       try {
         return await supabase.from('prompt_purchases').select('id').eq('prompt_id', id).eq('buyer_id', user.id).maybeSingle()
       } catch { return { data: null } }
     })(),
+    // 関連プロンプト: 同じジャンルの人気プロンプト（自分以外）
+    supabase
+      .from('prompts')
+      .select('*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)')
+      .eq('is_public', true)
+      .eq('genre_id', prompt.genre_id)
+      .neq('id', id)
+      .order('copy_count', { ascending: false })
+      .limit(6),
   ])
 
   const genre = GENRES.find(g => g.id === prompt.genre_id)
@@ -71,13 +100,99 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
   const hasPurchased = isOwner || !!myPurchase || justPurchased
   const showFullContent = !isPaid || hasPurchased
 
+  const relatedPrompts: PromptWithDetails[] = ((relatedRes?.data ?? []) as Record<string, unknown>[]).map((p) => ({
+    ...(p as unknown as PromptWithDetails),
+    favorite_count: Array.isArray(p.favorites)
+      ? (p.favorites[0] as { count: number })?.count ?? 0
+      : 0,
+  }))
+
+  // 構造化データ: HowTo + BreadcrumbList
+  const howToJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: prompt.title,
+    description: prompt.description || prompt.title,
+    totalTime: 'PT1M',
+    estimatedCost: { '@type': 'MonetaryAmount', currency: 'JPY', value: prompt.price || 0 },
+    tool: prompt.ai_model ? [{ '@type': 'HowToTool', name: prompt.ai_model }] : undefined,
+    author: {
+      '@type': 'Person',
+      name: prompt.profile?.username || '匿名',
+    },
+    datePublished: prompt.created_at,
+    dateModified: prompt.updated_at,
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+    step: [
+      {
+        '@type': 'HowToStep',
+        position: 1,
+        name: 'プロンプトをコピー',
+        text: 'このページの「コピー」ボタンをクリックしてプロンプトをクリップボードに保存します。',
+      },
+      {
+        '@type': 'HowToStep',
+        position: 2,
+        name: `${prompt.ai_model || 'AI'}に貼り付け`,
+        text: `${prompt.ai_model || 'ChatGPT・Claudeなどお好みのAI'}のチャット画面にプロンプトをペーストして送信します。`,
+      },
+      {
+        '@type': 'HowToStep',
+        position: 3,
+        name: '結果を活用',
+        text: 'AIから返ってきた結果をそのまま、または微調整して業務・創作に活用します。',
+      },
+    ],
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'ホーム', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'プロンプト一覧', item: `${SITE_URL}/prompts` },
+      ...(genre
+        ? [{ '@type': 'ListItem' as const, position: 3, name: genre.name, item: `${SITE_URL}/categories/${genre.slug}` }]
+        : []),
+      {
+        '@type': 'ListItem' as const,
+        position: genre ? 4 : 3,
+        name: prompt.title,
+        item: `${SITE_URL}/prompts/${id}`,
+      },
+    ],
+  }
+
+  const shareUrl = `${SITE_URL}/prompts/${id}`
+  const shareText = `${prompt.title} | ${SITE_NAME}\n${prompt.description ?? ''}`.slice(0, 200)
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="mb-4">
-        <Link href="/prompts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-          ← プロンプト一覧へ戻る
-        </Link>
-      </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
+      {/* パンくず */}
+      <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-4 flex-wrap" aria-label="Breadcrumb">
+        <Link href="/" className="hover:text-foreground transition-colors">ホーム</Link>
+        <ChevronRight className="w-3 h-3" />
+        <Link href="/prompts" className="hover:text-foreground transition-colors">プロンプト一覧</Link>
+        {genre && (
+          <>
+            <ChevronRight className="w-3 h-3" />
+            <Link href={`/categories/${genre.slug}`} className="hover:text-foreground transition-colors">
+              {genre.name}
+            </Link>
+          </>
+        )}
+        <ChevronRight className="w-3 h-3" />
+        <span className="text-foreground line-clamp-1">{prompt.title}</span>
+      </nav>
 
       {/* リーダーボード広告 */}
       <div className="mb-6">
@@ -146,7 +261,7 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
                       {prompt.content}
                     </pre>
                   </div>
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 mb-4">
                     <CopyButton promptId={prompt.id} content={prompt.content} />
                     <FavoriteButton
                       promptId={prompt.id}
@@ -170,6 +285,7 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
                       </>
                     )}
                   </div>
+                  <ShareButtons url={shareUrl} text={shareText} title={prompt.title} />
                 </>
               ) : (
                 /* 有料プロンプト - プレビュー + 購入ゲート */
@@ -198,7 +314,7 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
                     />
                   </div>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-wrap gap-3 mb-4">
                     <FavoriteButton
                       promptId={prompt.id}
                       initialFavorited={!!myFav}
@@ -206,6 +322,7 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
                       isLoggedIn={!!user}
                     />
                   </div>
+                  <ShareButtons url={shareUrl} text={shareText} title={prompt.title} />
                 </>
               )}
             </div>
@@ -226,6 +343,27 @@ export default async function PromptDetailPage({ params, searchParams }: Props) 
       <div className="mt-6 max-w-4xl">
         <AffiliateStrip promptId={id} />
       </div>
+
+      {/* 関連プロンプト（内部リンク強化 + SEO） */}
+      {relatedPrompts.length > 0 && (
+        <section className="mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">
+              {genre ? `関連する${genre.name}プロンプト` : '関連プロンプト'}
+            </h2>
+            {genre && (
+              <Link href={`/categories/${genre.slug}`}>
+                <Button variant="ghost" size="sm" className="text-muted-foreground">
+                  もっと見る
+                </Button>
+              </Link>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {relatedPrompts.map(p => <PromptCard key={p.id} prompt={p} />)}
+          </div>
+        </section>
+      )}
     </div>
   )
 }
