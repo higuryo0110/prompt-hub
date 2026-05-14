@@ -198,9 +198,10 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* リーダーボード広告2（ジャンル直下） */}
-      <div className="px-4 py-4 max-w-7xl mx-auto">
+      {/* リーダーボード広告2+3（ジャンル直下） */}
+      <div className="px-4 py-4 max-w-7xl mx-auto space-y-3">
         <A8Banner size="leaderboard2" />
+        <A8Banner size="leaderboard3" />
       </div>
 
       {/* PR・おすすめAIツール（横並びグリッド） */}
@@ -278,8 +279,9 @@ export default async function HomePage() {
               </section>
             )}
             {/* 新着下の広告 */}
-            <div className="py-6 border-t border-border">
+            <div className="py-6 border-t border-border space-y-3">
               <A8Banner size="leaderboard" />
+              <A8Banner size="leaderboard3" />
             </div>
           </div>
 
@@ -352,6 +354,9 @@ export default async function HomePage() {
       {/* CTA下の広告 */}
       <div className="px-4 py-6 max-w-7xl mx-auto">
         <A8Banner size="leaderboard2" />
+        <div className="mt-3">
+          <A8Banner size="leaderboard3" />
+        </div>
         <div className="mt-4 flex flex-wrap gap-4 justify-center">
           <A8Banner size="rect4" />
           <A8Banner size="rect" />

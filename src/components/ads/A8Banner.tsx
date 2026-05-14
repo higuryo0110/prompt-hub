@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 type A8BannerProps = {
-  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect3' | 'rect4' | 'rect-both' | 'leaderboard' | 'leaderboard2'
+  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect3' | 'rect4' | 'rect-both' | 'leaderboard' | 'leaderboard2' | 'leaderboard3'
   className?: string
 }
 
@@ -46,6 +46,28 @@ export default function A8Banner({ size = 'small', className = '' }: A8BannerPro
           />
         </a>
         <img style={{ border: 0 }} width={1} height={1} src="https://www15.a8.net/0.gif?a8mat=4B3MEV+6FLN3M+ONS+TV3PD" alt="" />
+      </div>
+    )
+  }
+
+  // 728x90 リーダーボード（3枚目）
+  if (size === 'leaderboard3') {
+    return (
+      <div className={`w-full overflow-x-auto text-center ${className}`}>
+        <a
+          href="https://px.a8.net/svt/ejp?a8mat=4B3QB0+3ITCMQ+50+7A6FY9"
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            style={{ border: 0, maxWidth: '100%', height: 'auto' }}
+            width={728}
+            height={90}
+            alt=""
+            src="https://www27.a8.net/svt/bgt?aid=260514540213&wid=001&eno=01&mid=s00000000018044036000&mc=1"
+          />
+        </a>
+        <img style={{ border: 0 }} width={1} height={1} src="https://www19.a8.net/0.gif?a8mat=4B3QB0+3ITCMQ+50+7A6FY9" alt="" />
       </div>
     )
   }
