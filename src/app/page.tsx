@@ -180,7 +180,7 @@ export default async function HomePage() {
 
       {/* Genres - アコーディオン型カテゴリ */}
       <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold mb-2">カテゴリから探す</h2>
             <p className="text-sm text-muted-foreground">
