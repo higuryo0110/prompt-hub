@@ -31,6 +31,30 @@ export async function signIn(formData: FormData) {
   redirect('/dashboard')
 }
 
+export async function signInWithGoogle(): Promise<void> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://promptshare.jp'}/auth/callback`,
+    },
+  })
+  if (error) throw new Error(error.message)
+  if (data.url) redirect(data.url)
+}
+
+export async function signInWithApple(): Promise<void> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'apple',
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://promptshare.jp'}/auth/callback`,
+    },
+  })
+  if (error) throw new Error(error.message)
+  if (data.url) redirect(data.url)
+}
+
 export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
