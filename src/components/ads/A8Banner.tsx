@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 type A8BannerProps = {
-  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect3' | 'rect-both' | 'leaderboard' | 'leaderboard2'
+  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect3' | 'rect4' | 'rect-both' | 'leaderboard' | 'leaderboard2'
   className?: string
 }
 
@@ -112,6 +112,28 @@ export default function A8Banner({ size = 'small', className = '' }: A8BannerPro
           />
         </a>
         <img style={{ border: 0 }} width={1} height={1} src="https://www14.a8.net/0.gif?a8mat=4B3MES+D6IHWY+5VEK+5YZ75" alt="" />
+      </div>
+    )
+  }
+
+  // 350x240 レクタングル（4枚目）
+  if (size === 'rect4') {
+    return (
+      <div className={`inline-block w-full max-w-[350px] ${className}`}>
+        <a
+          href="https://px.a8.net/svt/ejp?a8mat=4B3QAZ+G3W7ZM+1JUK+1HMIGH"
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            style={{ border: 0, maxWidth: '100%', height: 'auto' }}
+            width={350}
+            height={240}
+            alt=""
+            src="https://www28.a8.net/svt/bgt?aid=260514539974&wid=001&eno=01&mid=s00000007238009007000&mc=1"
+          />
+        </a>
+        <img style={{ border: 0 }} width={1} height={1} src="https://www16.a8.net/0.gif?a8mat=4B3QAZ+G3W7ZM+1JUK+1HMIGH" alt="" />
       </div>
     )
   }

@@ -240,6 +240,7 @@ export default async function HomePage() {
                 <A8Banner size="rect" />
                 <A8Banner size="rect2" />
                 <A8Banner size="rect3" />
+                <A8Banner size="rect4" />
               </div>
             </div>
 
