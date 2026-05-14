@@ -2,13 +2,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import PromptCard from '@/components/prompts/PromptCard'
-import NewsletterForm from '@/components/newsletter/NewsletterForm'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import HomeAffiliateGrid from '@/components/ads/HomeAffiliateGrid'
 import HomeAffiliateStrip from '@/components/ads/HomeAffiliateStrip'
 import A8Banner from '@/components/ads/A8Banner'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
-import { ArrowRight, Zap, TrendingUp, Mail } from 'lucide-react'
+import { ArrowRight, Zap, TrendingUp } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
 import CategoryAccordion from '@/components/home/CategoryAccordion'
 
@@ -271,20 +270,6 @@ export default async function HomePage() {
       <div className="max-w-4xl mx-auto px-4 pb-8">
         <HomeAffiliateStrip />
       </div>
-
-      {/* メルマガ登録 */}
-      <section className="py-16 px-4 border-t border-border">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="w-12 h-12 rounded-2xl bg-violet-500/15 flex items-center justify-center mx-auto mb-4">
-            <Mail className="w-6 h-6 text-violet-400" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">週刊AIプロンプト通信</h2>
-          <p className="text-muted-foreground mb-6">
-            毎週金曜日に厳選プロンプト5選と最新AIトレンドをお届けします。登録無料・いつでも解除可能。
-          </p>
-          <NewsletterForm />
-        </div>
-      </section>
 
       {/* FAQ - SEOとUX両方の効果 */}
       <section className="py-16 px-4 border-t border-border bg-muted/20">
