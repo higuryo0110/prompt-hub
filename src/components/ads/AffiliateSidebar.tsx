@@ -166,6 +166,7 @@ export default function AffiliateSidebar({ placement = 'sidebar' }: { placement?
       <div className="flex flex-col gap-2 items-center pt-1">
         <A8Banner size="rect" />
         <A8Banner size="rect2" />
+        <A8Banner size="rect3" />
       </div>
 
       {/* スポンサー枠直接掲載 */}

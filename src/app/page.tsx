@@ -236,7 +236,11 @@ export default async function HomePage() {
 
             {/* 人気と新着の間のA8.net 300x250バナー */}
             <div className="py-6 border-t border-border">
-              <A8Banner size="rect-both" />
+              <div className="flex flex-wrap gap-4 justify-center">
+                <A8Banner size="rect" />
+                <A8Banner size="rect2" />
+                <A8Banner size="rect3" />
+              </div>
             </div>
 
             {/* Latest */}
