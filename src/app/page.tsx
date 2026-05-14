@@ -192,8 +192,8 @@ export default async function HomePage() {
           {/* カテゴリ直下のレクタングル広告 */}
           <div className="mt-10 flex flex-wrap gap-4 justify-center">
             <A8Banner size="rect" />
-            <A8Banner size="rect3" />
-            <A8Banner size="rect4" />
+            <A8Banner size="rect5" />
+            <A8Banner size="rect6" />
           </div>
         </div>
       </section>
@@ -254,8 +254,8 @@ export default async function HomePage() {
             <div className="py-6 border-t border-border">
               <div className="flex flex-wrap gap-4 justify-center">
                 <A8Banner size="rect" />
-                <A8Banner size="rect2" />
-                <A8Banner size="rect3" />
+                <A8Banner size="rect5" />
+                <A8Banner size="rect6" />
                 <A8Banner size="rect4" />
               </div>
             </div>
@@ -300,9 +300,9 @@ export default async function HomePage() {
       {/* FAQ前のレクタングル広告 */}
       <div className="px-4 py-6 max-w-7xl mx-auto">
         <div className="flex flex-wrap gap-4 justify-center">
-          <A8Banner size="rect" />
+          <A8Banner size="rect5" />
           <A8Banner size="rect3" />
-          <A8Banner size="rect2" />
+          <A8Banner size="rect6" />
         </div>
       </div>
 

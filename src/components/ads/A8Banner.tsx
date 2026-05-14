@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 type A8BannerProps = {
-  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect3' | 'rect4' | 'rect-both' | 'leaderboard' | 'leaderboard2' | 'leaderboard3'
+  size?: 'small' | 'small2' | 'medium' | 'wide' | 'rect' | 'rect2' | 'rect3' | 'rect4' | 'rect5' | 'rect6' | 'rect-both' | 'leaderboard' | 'leaderboard2' | 'leaderboard3'
   className?: string
 }
 
@@ -156,6 +156,50 @@ export default function A8Banner({ size = 'small', className = '' }: A8BannerPro
           />
         </a>
         <img style={{ border: 0 }} width={1} height={1} src="https://www16.a8.net/0.gif?a8mat=4B3QAZ+G3W7ZM+1JUK+1HMIGH" alt="" />
+      </div>
+    )
+  }
+
+  // 300x250 レクタングル（5枚目）
+  if (size === 'rect5') {
+    return (
+      <div className={`inline-block w-full max-w-[300px] ${className}`}>
+        <a
+          href="https://px.a8.net/svt/ejp?a8mat=4B3QB0+3H11TE+5PZK+5YZ75"
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            style={{ border: 0, maxWidth: '100%', height: 'auto' }}
+            width={300}
+            height={250}
+            alt=""
+            src="https://www20.a8.net/svt/bgt?aid=260514540210&wid=001&eno=01&mid=s00000026696001003000&mc=1"
+          />
+        </a>
+        <img style={{ border: 0 }} width={1} height={1} src="https://www17.a8.net/0.gif?a8mat=4B3QB0+3H11TE+5PZK+5YZ75" alt="" />
+      </div>
+    )
+  }
+
+  // 336x280 レクタングル（6枚目）
+  if (size === 'rect6') {
+    return (
+      <div className={`inline-block w-full max-w-[336px] ${className}`}>
+        <a
+          href="https://px.a8.net/svt/ejp?a8mat=4B3QB0+3H11TE+5PZK+61C2P"
+          rel="nofollow noopener noreferrer"
+          target="_blank"
+        >
+          <img
+            style={{ border: 0, maxWidth: '100%', height: 'auto' }}
+            width={336}
+            height={280}
+            alt=""
+            src="https://www24.a8.net/svt/bgt?aid=260514540210&wid=001&eno=01&mid=s00000026696001014000&mc=1"
+          />
+        </a>
+        <img style={{ border: 0 }} width={1} height={1} src="https://www18.a8.net/0.gif?a8mat=4B3QB0+3H11TE+5PZK+61C2P" alt="" />
       </div>
     )
   }
