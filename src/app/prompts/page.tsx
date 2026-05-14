@@ -328,6 +328,11 @@ export default async function PromptsPage({ searchParams }: Props) {
           <div className="mt-8">
             <A8Banner size="leaderboard2" />
           </div>
+          <div className="mt-6 flex flex-wrap gap-4 justify-center">
+            <A8Banner size="rect" />
+            <A8Banner size="rect3" />
+            <A8Banner size="rect4" />
+          </div>
         </div>
 
         {/* サイドバー（デスクトップのみ） */}
@@ -335,6 +340,7 @@ export default async function PromptsPage({ searchParams }: Props) {
           <AffiliateSidebar placement="prompt-list" />
           <div className="flex flex-col gap-2 items-center pt-2">
             <A8Banner size="small" />
+            <A8Banner size="small2" />
           </div>
         </div>
       </div>

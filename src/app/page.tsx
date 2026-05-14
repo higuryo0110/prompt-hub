@@ -188,6 +188,13 @@ export default async function HomePage() {
             </p>
           </div>
           <CategoryAccordion />
+
+          {/* カテゴリ直下のレクタングル広告 */}
+          <div className="mt-10 flex flex-wrap gap-4 justify-center">
+            <A8Banner size="rect" />
+            <A8Banner size="rect3" />
+            <A8Banner size="rect4" />
+          </div>
         </div>
       </section>
 
@@ -209,6 +216,14 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* レクタングル広告帯 */}
+      <div className="px-4 py-6 max-w-7xl mx-auto">
+        <div className="flex flex-wrap gap-4 justify-center">
+          <A8Banner size="rect2" />
+          <A8Banner size="rect4" />
+        </div>
+      </div>
 
       {/* Popular + Latest + Sidebar */}
       <div className="max-w-7xl mx-auto px-4">
@@ -262,6 +277,10 @@ export default async function HomePage() {
                 </div>
               </section>
             )}
+            {/* 新着下の広告 */}
+            <div className="py-6 border-t border-border">
+              <A8Banner size="leaderboard" />
+            </div>
           </div>
 
           {/* サイドバー（xl以上で表示） */}
@@ -274,6 +293,15 @@ export default async function HomePage() {
       {/* PR横長バナー（新着とメルマガの間） */}
       <div className="max-w-4xl mx-auto px-4 pb-8">
         <HomeAffiliateStrip />
+      </div>
+
+      {/* FAQ前のレクタングル広告 */}
+      <div className="px-4 py-6 max-w-7xl mx-auto">
+        <div className="flex flex-wrap gap-4 justify-center">
+          <A8Banner size="rect" />
+          <A8Banner size="rect3" />
+          <A8Banner size="rect2" />
+        </div>
       </div>
 
       {/* FAQ - SEOとUX両方の効果 */}
@@ -320,6 +348,22 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* CTA下の広告 */}
+      <div className="px-4 py-6 max-w-7xl mx-auto">
+        <A8Banner size="leaderboard2" />
+        <div className="mt-4 flex flex-wrap gap-4 justify-center">
+          <A8Banner size="rect4" />
+          <A8Banner size="rect" />
+          <A8Banner size="rect3" />
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3 justify-center">
+          <A8Banner size="small" />
+          <A8Banner size="small2" />
+          <A8Banner size="small" />
+          <A8Banner size="small2" />
+        </div>
+      </div>
     </div>
   )
 }
