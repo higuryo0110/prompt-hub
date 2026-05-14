@@ -87,3 +87,7 @@
     backdrop-filter: blur(12px);
   }
 }
+
+a, button, [role="button"], summary {
+  cursor: pointer;
+}
