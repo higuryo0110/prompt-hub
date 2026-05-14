@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://promptshare.jp/sitemap.xml
+
+Host: https://promptshare.jp

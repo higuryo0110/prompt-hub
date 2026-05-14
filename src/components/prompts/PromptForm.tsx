@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { GENRES, AI_MODELS } from '@/lib/genres'
+import { GENRES, AI_MODELS, CATEGORY_GROUPS } from '@/lib/genres'
 import { createPrompt, updatePrompt } from '@/lib/actions/prompts'
 import type { Prompt } from '@/types'
 import { Loader2, Crown, Lock } from 'lucide-react'
@@ -77,8 +77,13 @@ export default function PromptForm({ prompt }: Props) {
                        focus:outline-none focus:border-violet-500 text-foreground"
           >
             <option value="">選択してください</option>
-            {GENRES.map(g => (
-              <option key={g.id} value={g.id}>{g.name}</option>
+            {CATEGORY_GROUPS.map(group => (
+              <optgroup key={group.slug} label={group.name}>
+                {group.genreSlugs.map(slug => {
+                  const g = GENRES.find(x => x.slug === slug)
+                  return g ? <option key={g.id} value={g.id}>{g.name}</option> : null
+                })}
+              </optgroup>
             ))}
           </select>
         </div>

@@ -5,14 +5,32 @@ import AdBanner from '@/components/ads/AdBanner'
 import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import A8Banner from '@/components/ads/A8Banner'
 import type { PromptWithDetails } from '@/types'
-import { GENRES } from '@/lib/genres'
+import { GENRES, CATEGORY_GROUPS } from '@/lib/genres'
+import { SITE_URL, SITE_NAME } from '@/lib/constants'
 import { Suspense } from 'react'
 import { Search, Clock, Heart, Copy, LayoutGrid } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'AIプロンプト一覧 | カテゴリ・人気順で探す',
+  description:
+    'ChatGPT・Claude・Gemini・Midjourney対応の高品質AIプロンプトを一覧で探せます。業務効率化・アプリ開発・画像生成・ライティングなど8カテゴリから検索。コピペで即利用可能。',
+  keywords: ['AIプロンプト 一覧', 'プロンプト 検索', 'ChatGPT プロンプト', 'Claude プロンプト', 'プロンプト集'],
+  openGraph: {
+    title: 'AIプロンプト一覧 | カテゴリ・人気順で探す',
+    description: 'ChatGPT・Claude・Gemini対応の高品質AIプロンプトを一覧で探せます。',
+    url: `${SITE_URL}/prompts`,
+    type: 'website',
+  },
+  alternates: { canonical: `${SITE_URL}/prompts` },
+}
+
+const PAGE_SIZE = 24
 
 type Props = {
-  searchParams: Promise<{ genre?: string; q?: string; sort?: string }>
+  searchParams: Promise<{ genre?: string; q?: string; sort?: string; page?: string }>
 }
 
 const SORT_OPTIONS = [
@@ -21,9 +39,12 @@ const SORT_OPTIONS = [
   { value: 'popular', label: 'コピー数順', icon: Copy },
 ]
 
-async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort?: string }): Promise<React.ReactElement> {
+async function PromptList({ genre, q, sort, page }: { genre?: string; q?: string; sort?: string; page?: number }): Promise<React.ReactElement> {
   const supabase = await createClient()
+  const currentPage = page ?? 1
+  const offset = (currentPage - 1) * PAGE_SIZE
 
+  let countQuery = supabase.from('prompts').select('*', { count: 'exact', head: true }).eq('is_public', true)
   let query = supabase
     .from('prompts')
     .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*)`)
@@ -31,10 +52,14 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
 
   if (genre && genre !== 'all') {
     const g = GENRES.find(x => x.slug === genre)
-    if (g) query = query.eq('genre_id', g.id)
+    if (g) {
+      query = query.eq('genre_id', g.id)
+      countQuery = countQuery.eq('genre_id', g.id)
+    }
   }
   if (q) {
-    query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,content.ilike.%${q}%`)
+    query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+    countQuery = countQuery.or(`title.ilike.%${q}%,description.ilike.%${q}%`)
   }
 
   if (sort === 'popular') {
@@ -45,8 +70,12 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
     query = query.order('created_at', { ascending: false })
   }
 
-  const { data } = await query.limit(48)
+  const [{ data }, { count }] = await Promise.all([
+    query.range(offset, offset + PAGE_SIZE - 1),
+    countQuery,
+  ])
 
+  const total = count ?? 0
   const prompts: PromptWithDetails[] = (data ?? []).map((p: Record<string, unknown>) => ({
     ...(p as unknown as PromptWithDetails),
     favorite_count: (p.favorite_count as number) ?? 0,
@@ -62,16 +91,18 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
     )
   }
 
+  const totalPages = Math.ceil(total / PAGE_SIZE)
+
   const withAds: React.ReactNode[] = []
   prompts.forEach((prompt, index) => {
     withAds.push(
       <PromptCard
         key={prompt.id}
         prompt={prompt}
-        rank={sort !== 'new' && sort !== undefined && index < 3 ? index + 1 : undefined}
+        rank={sort !== 'new' && sort !== undefined && currentPage === 1 && index < 3 ? index + 1 : undefined}
       />
     )
-    if (index === 7 || index === 19) {
+    if (index === 11) {
       withAds.push(
         <div key={`ad-${index}`} className="col-span-full">
           <AdBanner slot="1234567890" format="horizontal" className="max-w-2xl mx-auto" />
@@ -80,12 +111,52 @@ async function PromptList({ genre, q, sort }: { genre?: string; q?: string; sort
     }
   })
 
+  const buildPageUrl = (p: number, params: { genre?: string; q?: string; sort?: string }) => {
+    const merged = new URLSearchParams()
+    if (params.genre && params.genre !== 'all') merged.set('genre', params.genre)
+    if (params.q) merged.set('q', params.q)
+    if (params.sort && params.sort !== 'new') merged.set('sort', params.sort)
+    if (p > 1) merged.set('page', String(p))
+    const qs = merged.toString()
+    return `/prompts${qs ? `?${qs}` : ''}`
+  }
+
   return (
     <>
-      <p className="text-sm text-muted-foreground mb-4">{prompts.length}件のプロンプト</p>
+      <p className="text-sm text-muted-foreground mb-4">
+        {total}件中 {offset + 1}〜{Math.min(offset + PAGE_SIZE, total)}件を表示
+      </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {withAds}
       </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-10">
+          {currentPage > 1 && (
+            <a href={buildPageUrl(currentPage - 1, { genre, q, sort })}
+              className="px-4 py-2 rounded-xl border border-border bg-card text-sm hover:border-violet-500/50 transition-colors">
+              ← 前へ
+            </a>
+          )}
+          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+            const p = i + 1
+            return (
+              <a key={p} href={buildPageUrl(p, { genre, q, sort })}
+                className={`w-9 h-9 rounded-xl border text-sm flex items-center justify-center transition-colors
+                  ${p === currentPage
+                    ? 'bg-gradient-to-r from-violet-600 to-cyan-600 border-transparent text-white'
+                    : 'border-border bg-card hover:border-violet-500/50'}`}>
+                {p}
+              </a>
+            )
+          })}
+          {currentPage < totalPages && (
+            <a href={buildPageUrl(currentPage + 1, { genre, q, sort })}
+              className="px-4 py-2 rounded-xl border border-border bg-card text-sm hover:border-violet-500/50 transition-colors">
+              次へ →
+            </a>
+          )}
+        </div>
+      )}
     </>
   )
 }
@@ -95,6 +166,7 @@ export default async function PromptsPage({ searchParams }: Props) {
   const genre = params.genre ?? 'all'
   const q = params.q ?? ''
   const sort = params.sort ?? 'new'
+  const page = Math.max(1, parseInt(params.page ?? '1', 10))
 
   const buildUrl = (overrides: Record<string, string>) => {
     const merged = { genre, q, sort, ...overrides }
@@ -171,27 +243,58 @@ export default async function PromptsPage({ searchParams }: Props) {
         </div>
       </div>
 
-      {/* ── ジャンルフィルター ── */}
+      {/* ── ジャンルフィルター（階層型） ── */}
       <div className="mb-8">
         <p className="text-xs text-muted-foreground mb-2 font-medium">ジャンル</p>
-        <div className="flex flex-wrap gap-2">
-          {allGenres.map(g => {
-            const IconComponent = Icons[g.icon as keyof typeof Icons] as LucideIcon
-            const isActive = genre === g.slug
+        {/* すべてボタン */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          <a
+            href={buildUrl({ genre: 'all' })}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
+                        transition-all duration-200 border no-underline
+                        ${genre === 'all'
+                ? 'bg-gradient-to-r from-violet-600 to-cyan-600 border-transparent text-white shadow-lg shadow-violet-500/25'
+                : 'bg-card border-border text-muted-foreground hover:border-violet-500/50 hover:text-foreground'
+              }`}
+          >
+            <LayoutGrid className={`w-3.5 h-3.5 ${genre === 'all' ? 'text-white' : 'text-slate-300'}`} />
+            すべて
+          </a>
+        </div>
+        {/* 大カテゴリ → 小カテゴリ */}
+        <div className="space-y-2">
+          {CATEGORY_GROUPS.map(group => {
+            const GroupIcon = Icons[group.icon as keyof typeof Icons] as LucideIcon
+            const hasActive = group.genreSlugs.includes(genre)
             return (
-              <a
-                key={g.slug}
-                href={buildUrl({ genre: g.slug })}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-                            transition-all duration-200 border no-underline
-                            ${isActive
-                    ? 'bg-gradient-to-r from-violet-600 to-cyan-600 border-transparent text-white shadow-lg shadow-violet-500/25'
-                    : 'bg-card border-border text-muted-foreground hover:border-violet-500/50 hover:text-foreground'
-                  }`}
-              >
-                {IconComponent && <IconComponent className={`w-3.5 h-3.5 ${isActive ? 'text-white' : g.color}`} />}
-                {g.name}
-              </a>
+              <div key={group.slug}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  {GroupIcon && <GroupIcon className={`w-3.5 h-3.5 ${group.color}`} />}
+                  <span className={`text-xs font-semibold ${hasActive ? 'text-violet-300' : 'text-muted-foreground'}`}>
+                    {group.name}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 ml-5">
+                  {group.genreSlugs.map(slug => {
+                    const g = GENRES.find(x => x.slug === slug)
+                    if (!g) return null
+                    const isActive = genre === slug
+                    return (
+                      <a
+                        key={slug}
+                        href={buildUrl({ genre: slug })}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all duration-200 border no-underline
+                                    ${isActive
+                            ? 'bg-violet-600/30 border-violet-500/50 text-violet-300'
+                            : 'bg-card border-border text-muted-foreground hover:border-violet-500/50 hover:text-foreground'
+                          }`}
+                      >
+                        {g.name}
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
             )
           })}
         </div>
@@ -210,7 +313,7 @@ export default async function PromptsPage({ searchParams }: Props) {
       <div className="flex gap-8 items-start">
         <div className="flex-1 min-w-0">
           <Suspense
-            key={`${genre}-${q}-${sort}`}
+            key={`${genre}-${q}-${sort}-${page}`}
             fallback={
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -219,7 +322,7 @@ export default async function PromptsPage({ searchParams }: Props) {
               </div>
             }
           >
-            <PromptList genre={genre} q={q} sort={sort} />
+            <PromptList genre={genre} q={q} sort={sort} page={page} />
           </Suspense>
           {/* プロンプト一覧下部 リーダーボード2 */}
           <div className="mt-8">

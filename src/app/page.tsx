@@ -7,12 +7,10 @@ import AffiliateSidebar from '@/components/ads/AffiliateSidebar'
 import HomeAffiliateGrid from '@/components/ads/HomeAffiliateGrid'
 import HomeAffiliateStrip from '@/components/ads/HomeAffiliateStrip'
 import A8Banner from '@/components/ads/A8Banner'
-import { GENRES } from '@/lib/genres'
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, CATEGORY_META } from '@/lib/constants'
-import { ArrowRight, Zap, Users, TrendingUp, Mail } from 'lucide-react'
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/constants'
+import { ArrowRight, Zap, TrendingUp, Mail } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
-import * as Icons from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import CategoryAccordion from '@/components/home/CategoryAccordion'
 
 const websiteJsonLd = {
   '@context': 'https://schema.org',
@@ -81,19 +79,27 @@ const faqJsonLd = {
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const { data: prompts } = await supabase
-    .from('prompts')
-    .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)`)
-    .eq('is_public', true)
-    .order('created_at', { ascending: false })
-    .limit(8)
-
-  const popularPrompts = await supabase
-    .from('prompts')
-    .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)`)
-    .eq('is_public', true)
-    .order('copy_count', { ascending: false })
-    .limit(4)
+  const [
+    { data: prompts },
+    popularPrompts,
+    { count: _promptCount },
+    { count: _userCount },
+  ] = await Promise.all([
+    supabase
+      .from('prompts')
+      .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)`)
+      .eq('is_public', true)
+      .order('created_at', { ascending: false })
+      .limit(8),
+    supabase
+      .from('prompts')
+      .select(`*, genre:genres(*), profile:profiles!prompts_user_id_fkey(*), favorites(count)`)
+      .eq('is_public', true)
+      .order('copy_count', { ascending: false })
+      .limit(4),
+    supabase.from('prompts').select('*', { count: 'exact', head: true }).eq('is_public', true),
+    supabase.from('profiles').select('*', { count: 'exact', head: true }),
+  ])
 
   const formatPrompts = (data: Record<string, unknown>[] | null): PromptWithDetails[] =>
     (data ?? []).map(p => ({
@@ -105,6 +111,8 @@ export default async function HomePage() {
 
   const latestPrompts = formatPrompts(prompts as unknown as Record<string, unknown>[])
   const topPrompts = formatPrompts(popularPrompts.data as unknown as Record<string, unknown>[])
+  void _promptCount
+  void _userCount
 
   return (
     <div className="min-h-screen">
@@ -153,9 +161,8 @@ export default async function HomePage() {
 
           <div className="flex flex-wrap gap-8 justify-center mt-14 text-sm text-muted-foreground">
             {[
-              { icon: Zap, label: '高品質プロンプト', value: '1,000+' },
-              { icon: Users, label: '登録ユーザー', value: '500+' },
-              { icon: TrendingUp, label: '月間コピー数', value: '10,000+' },
+              { icon: Zap, label: '完全無料', value: 'コピペで即利用' },
+              { icon: TrendingUp, label: 'カテゴリ', value: '33分野対応' },
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} className="flex items-center gap-2">
                 <Icon className="w-4 h-4 text-violet-400" />
@@ -172,38 +179,16 @@ export default async function HomePage() {
         <A8Banner size="leaderboard" />
       </div>
 
-      {/* Genres - 内部リンクのSEOハブ */}
+      {/* Genres - アコーディオン型カテゴリ */}
       <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10">
             <h2 className="text-2xl md:text-3xl font-bold mb-2">カテゴリから探す</h2>
             <p className="text-sm text-muted-foreground">
-              用途別に厳選されたプロンプトをカテゴリページで一気にチェック
+              カテゴリをタップして分野別のプロンプトを見つけましょう
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {GENRES.map(genre => {
-              const meta = CATEGORY_META[genre.slug]
-              const IconComponent = Icons[genre.icon as keyof typeof Icons] as LucideIcon
-              return (
-                <Link key={genre.slug} href={`/categories/${genre.slug}`}>
-                  <div className="group bg-card border border-border rounded-xl p-5 flex flex-col gap-2
-                                  hover:border-violet-500/50 transition-all duration-200 hover:-translate-y-0.5 card-glow h-full">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{meta?.emoji ?? '✨'}</span>
-                      <span className="font-bold text-base group-hover:text-violet-300 transition-colors">
-                        {genre.name}
-                      </span>
-                      {IconComponent && <IconComponent className={`w-4 h-4 ml-auto ${genre.color}`} />}
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                      {meta?.description?.slice(0, 60) ?? ''}
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
+          <CategoryAccordion />
         </div>
       </section>
 

@@ -2,6 +2,12 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host') || ''
+  if (host.endsWith('.vercel.app')) {
+    const url = new URL(request.nextUrl.pathname + request.nextUrl.search, 'https://promptshare.jp')
+    return NextResponse.redirect(url, 301)
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(

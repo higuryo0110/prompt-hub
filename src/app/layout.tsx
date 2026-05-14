@@ -68,6 +68,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#7c3aed" />
+        <link rel="preconnect" href="https://atgtjtyflpiaxwmdador.supabase.co" />
+        <link rel="dns-prefetch" href="https://atgtjtyflpiaxwmdador.supabase.co" />
         {/* 構造化データ: Organization */}
         <script
           type="application/ld+json"
