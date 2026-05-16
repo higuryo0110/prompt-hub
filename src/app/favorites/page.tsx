@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PromptCard from '@/components/prompts/PromptCard'
 import type { PromptWithDetails } from '@/types'
+import A8Banner from '@/components/ads/A8Banner'
 import { Heart } from 'lucide-react'
 
 export default async function FavoritesPage() {
@@ -51,6 +52,14 @@ export default async function FavoritesPage() {
           ))}
         </div>
       )}
+      {/* 広告 */}
+      <div className="mt-8 flex flex-wrap gap-4 justify-center">
+        <A8Banner size="rect5" />
+        <A8Banner size="rect6" />
+      </div>
+      <div className="mt-4">
+        <A8Banner size="leaderboard3" />
+      </div>
     </div>
   )
 }

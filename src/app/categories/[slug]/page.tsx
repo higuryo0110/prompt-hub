@@ -5,6 +5,7 @@ import PromptCard from '@/components/prompts/PromptCard'
 import { Button } from '@/components/ui/button'
 import { GENRES } from '@/lib/genres'
 import { CATEGORY_META, SITE_URL, SITE_NAME } from '@/lib/constants'
+import A8Banner from '@/components/ads/A8Banner'
 import { ArrowRight, ChevronRight } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -159,6 +160,16 @@ export default async function CategoryPage({ params }: Props) {
         </>
       )}
 
+      {/* 広告 */}
+      <div className="my-8 flex flex-wrap gap-4 justify-center">
+        <A8Banner size="rect5" />
+        <A8Banner size="rect6" />
+        <A8Banner size="rect3" />
+      </div>
+      <div className="mb-8">
+        <A8Banner size="leaderboard3" />
+      </div>
+
       {/* SEO本文 — カテゴリの活用法ガイド */}
       <section className="bg-card border border-border rounded-2xl p-8 mb-12">
         <h2 className="text-2xl font-bold mb-4">{genre.name}プロンプトの使い方ガイド</h2>
@@ -181,6 +192,11 @@ export default async function CategoryPage({ params }: Props) {
           </p>
         </div>
       </section>
+
+      {/* 広告2 */}
+      <div className="mb-8">
+        <A8Banner size="leaderboard" />
+      </div>
 
       {/* 関連カテゴリ */}
       <section className="mb-8">

@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import BottomNav from '@/components/layout/BottomNav'
+import InstallPrompt from '@/components/pwa/InstallPrompt'
 import { Toaster } from '@/components/ui/sonner'
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/constants'
 
@@ -67,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja" suppressHydrationWarning>
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#7c3aed" />
         <link rel="preconnect" href="https://atgtjtyflpiaxwmdador.supabase.co" />
         <link rel="dns-prefetch" href="https://atgtjtyflpiaxwmdador.supabase.co" />
@@ -95,6 +98,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Navbar />
         <main>{children}</main>
         <Footer />
+        <BottomNav />
+        <InstallPrompt />
         <Toaster theme="dark" />
         <script dangerouslySetInnerHTML={{
           __html: `

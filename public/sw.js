@@ -1,5 +1,5 @@
-const CACHE_NAME = 'prompt-share-v1'
-const STATIC_ASSETS = ['/', '/prompts', '/login', '/signup', '/manifest.json']
+const CACHE_NAME = 'prompt-share-v2'
+const STATIC_ASSETS = ['/', '/prompts', '/login', '/signup', '/manifest.json', '/offline.html']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -21,6 +21,8 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
   if (!event.request.url.startsWith(self.location.origin)) return
 
+  const isNavigate = event.request.mode === 'navigate'
+
   event.respondWith(
     fetch(event.request)
       .then((response) => {
@@ -30,6 +32,12 @@ self.addEventListener('fetch', (event) => {
         }
         return response
       })
-      .catch(() => caches.match(event.request).then((cached) => cached || Response.error()))
+      .catch(() =>
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached
+          if (isNavigate) return caches.match('/offline.html')
+          return Response.error()
+        })
+      )
   )
 })

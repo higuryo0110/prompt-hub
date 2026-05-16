@@ -91,3 +91,18 @@
 a, button, [role="button"], summary {
   cursor: pointer;
 }
+
+/* モバイルボトムナビ分のパディング */
+@media (max-width: 767px) {
+  main { padding-bottom: 3.5rem; }
+}
+
+/* iOS safe area */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* PWA standalone モード */
+@media (display-mode: standalone) {
+  .glass { position: sticky; top: 0; }
+}

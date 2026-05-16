@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import PromptCard from '@/components/prompts/PromptCard'
 import { Button } from '@/components/ui/button'
 import { SITE_URL, SITE_NAME } from '@/lib/constants'
+import A8Banner from '@/components/ads/A8Banner'
 import { Trophy, Flame, Sparkles, ChevronRight } from 'lucide-react'
 import type { PromptWithDetails } from '@/types'
 import type { Metadata } from 'next'
@@ -188,6 +189,16 @@ export default async function RankingsPage({ searchParams }: Props) {
           ))}
         </div>
       )}
+
+      {/* 広告 */}
+      <div className="mt-8 flex flex-wrap gap-4 justify-center">
+        <A8Banner size="rect5" />
+        <A8Banner size="rect6" />
+        <A8Banner size="rect4" />
+      </div>
+      <div className="mt-4">
+        <A8Banner size="leaderboard3" />
+      </div>
 
       <div className="mt-12 text-center">
         <Link href="/prompts">
